@@ -24,7 +24,7 @@ export function usePets(tutorId?: string): UseQueryResult<Pet[], Error> {
     return useQuery({
         queryKey: [...petQueryKeys.all, { tutorId }],
         queryFn: () => listarPets(tutorId),
-        enabled: Boolean(tutorId),
+        enabled: true,
     });
 }
 

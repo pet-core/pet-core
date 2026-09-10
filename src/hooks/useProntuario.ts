@@ -1,157 +1,144 @@
-import { useState, useEffect } from "react";
-import { getUsuarioLogado } from "../services/authStorage";
-import { getTutores } from "../services/userService";
-import { getPetsByTutor } from "../services/petService";
-import { addClinicalRecord } from "../services/clinicalRecordService";
-import { KEYS } from "../services/storage";
-import type { Usuario, Pet, RegistroClinico } from "../types/models";
+import { useMemo, useState } from "react";
+import type { Pet, RegistroClinico } from "../types/models";
+import type { ClinicalRecordCreateRequest, ClinicalRecordUpdateRequest } from "../types/api";
+import {
+    useAtualizarClinicalRecord,
+    useCriarClinicalRecord,
+    useExcluirClinicalRecord,
+    useClinicalRecords,
+} from "./api/useClinicalRecords";
+import { usePets } from "./api/usePets";
+
+const registroVazio = {
+    petId: "",
+    petNome: "",
+    tutorId: "",
+    tutorNome: "",
+    dataConsulta: "",
+    temperatura: "",
+    peso: "",
+    tratamento: "",
+    observacoes: "",
+};
 
 export function useProntuario() {
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
-
-    const [tutores, setTutores] = useState<Usuario[]>([]);
-
-    const [tutorSelecionado, setTutorSelecionado] = useState<Usuario | null>(null);
-
-    const [petsDoTutor, setPetsDoTutor] = useState<Pet[]>([]);
-
+    const [formulario, setFormulario] = useState(registroVazio);
+    const [registroEditando, setRegistroEditando] = useState<string | null>(null);
     const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
-
-    const [dataConsulta, setDataConsulta] = useState("");
-
-    const [temperatura, setTemperatura] = useState("");
-
-    const [peso, setPeso] = useState("");
-
-    const [tratamento, setTratamento] = useState("");
-
-    const [observacoes, setObservacoes] = useState("");
-
     const [mensagem, setMensagem] = useState("");
 
-    const [modalTutor, setModalTutor] = useState(false);
+    const registrosQuery = useClinicalRecords();
+    const petsQuery = usePets();
+    const criarRegistro = useCriarClinicalRecord();
+    const atualizarRegistro = useAtualizarClinicalRecord();
+    const excluirRegistro = useExcluirClinicalRecord();
 
-    const [modalPet, setModalPet] = useState(false);
+    const registros = useMemo(() => registrosQuery.data ?? [], [registrosQuery.data]);
+    const pets = useMemo(() => petsQuery.data ?? [], [petsQuery.data]);
 
-    useEffect(() => {
-            buscarDados();
-        }, []);
-
-    async function buscarDados() {
-        const user = await getUsuarioLogado();
-        const tutoresDisponiveis = await getTutores();
-
-        if (user !== null) {
-            setUsuario(user);
-        }
-
-        setTutores(tutoresDisponiveis);
+    function atualizarCampo(campo: keyof typeof registroVazio, valor: string) {
+        setFormulario((atual) => ({ ...atual, [campo]: valor }));
+        setMensagem("");
     }
 
-    async function buscarPetsDoTutor(tutorId: string) {
-        setPetsDoTutor(await getPetsByTutor(tutorId));
+    function selecionarPet(pet: Pet) {
+        setPetSelecionado(pet);
+        setFormulario((atual) => ({
+            ...atual,
+            petId: pet.id,
+            petNome: pet.nome,
+            tutorId: pet.tutorId,
+        }));
+        setMensagem("");
     }
 
-    function selecionarTutor(item: Usuario) {
-            setTutorSelecionado(item);
-            setPetSelecionado(null);
-            setMensagem("");
-            setModalTutor(false);
-            buscarPetsDoTutor(item.id);
-        }
+    function iniciarNovoRegistro() {
+        setRegistroEditando(null);
+        setPetSelecionado(null);
+        setFormulario(registroVazio);
+        setMensagem("");
+    }
 
-    function selecionarPet(item: Pet) {
-            setPetSelecionado(item);
-            setMensagem("");
-            setModalPet(false);
-        }
+    function editarRegistro(registro: RegistroClinico) {
+        const pet = pets.find((item) => item.id === registro.petId) ?? null;
+        setRegistroEditando(registro.id);
+        setPetSelecionado(pet);
+        setFormulario({
+            petId: registro.petId,
+            petNome: registro.petNome,
+            tutorId: registro.tutorId,
+            tutorNome: registro.tutorNome,
+            dataConsulta: registro.dataConsulta ?? "",
+            temperatura: registro.temperatura ?? "",
+            peso: registro.peso ?? "",
+            tratamento: registro.tratamento ?? "",
+            observacoes: registro.observacoes ?? "",
+        });
+        setMensagem("");
+    }
 
     function formatarData(texto: string) {
-            let numeros = texto.replace(/\D/g, "");
-            if (numeros.length > 8) {
-                numeros = numeros.slice(0, 8);
-            }
-            if (numeros.length > 4) {
-                return `${numeros.slice(0, 2)}/${numeros.slice(2, 4)}/${numeros.slice(4)}`;
-            }
-            if (numeros.length > 2) {
-                return `${numeros.slice(0, 2)}/${numeros.slice(2)}`;
-            }
-            return numeros;
-        }
+        let numeros = texto.replace(/\D/g, "");
+        if (numeros.length > 8) numeros = numeros.slice(0, 8);
+        if (numeros.length > 4) return `${numeros.slice(0, 2)}/${numeros.slice(2, 4)}/${numeros.slice(4)}`;
+        if (numeros.length > 2) return `${numeros.slice(0, 2)}/${numeros.slice(2)}`;
+        return numeros;
+    }
 
     async function salvarProntuario() {
-        if (!tutorSelecionado || !petSelecionado || !dataConsulta) {
-            setMensagem("Selecione tutor, pet e informe a data da consulta.");
+        if (!formulario.petId || !formulario.dataConsulta || !formulario.tutorNome.trim()) {
+            setMensagem("Selecione o pet, informe a data e o nome do tutor.");
             return;
         }
 
-        if (!usuario) {
-            setMensagem("Usuário não encontrado.");
-            return;
-        }
-
-        const novoProntuario: RegistroClinico = {
-            id: `${Date.now()}`,
-            tutorId: tutorSelecionado.id,
-            tutorNome: tutorSelecionado.nome,
-            petId: petSelecionado.id,
-            petNome: petSelecionado.nome,
-            veterinarioId: usuario.id,
-            veterinarioNome: usuario.nome,
-            dataConsulta,
-            temperatura,
-            peso,
-            tratamento,
-            observacoes,
+        const dados = {
+            ...formulario,
+            tutorNome: formulario.tutorNome.trim(),
         };
 
-        await addClinicalRecord(KEYS.PRONTUARIOS, novoProntuario);
+        try {
+            if (registroEditando) {
+                const request: ClinicalRecordUpdateRequest = dados;
+                await atualizarRegistro.mutateAsync({ id: registroEditando, dados: request });
+                setMensagem("Prontuário atualizado com sucesso.");
+            } else {
+                const request: ClinicalRecordCreateRequest = dados;
+                await criarRegistro.mutateAsync(request);
+                setMensagem("Prontuário criado com sucesso.");
+            }
+            iniciarNovoRegistro();
+        } catch {
+            setMensagem("Não foi possível salvar o prontuário. Verifique a API e tente novamente.");
+        }
+    }
 
-        setMensagem("Prontuário salvo com sucesso.");
-
-        setTutorSelecionado(null);
-        setPetsDoTutor([]);
-        setPetSelecionado(null);
-        setDataConsulta("");
-        setTemperatura("");
-        setPeso("");
-        setTratamento("");
-        setObservacoes("");
+    async function excluirProntuario(id: string) {
+        try {
+            await excluirRegistro.mutateAsync(id);
+            if (registroEditando === id) iniciarNovoRegistro();
+            setMensagem("Prontuário excluído com sucesso.");
+        } catch {
+            setMensagem("Não foi possível excluir o prontuário. Tente novamente.");
+        }
     }
 
     return {
-        usuario,
-        setUsuario,
-        tutores,
-        setTutores,
-        tutorSelecionado,
-        setTutorSelecionado,
-        petsDoTutor,
-        setPetsDoTutor,
+        formulario,
+        registros,
+        pets,
         petSelecionado,
-        setPetSelecionado,
-        dataConsulta,
-        setDataConsulta,
-        temperatura,
-        setTemperatura,
-        peso,
-        setPeso,
-        tratamento,
-        setTratamento,
-        observacoes,
-        setObservacoes,
+        registroEditando,
         mensagem,
-        setMensagem,
-        modalTutor,
-        setModalTutor,
-        modalPet,
-        setModalPet,
-        buscarDados,
-        buscarPetsDoTutor,
-        selecionarTutor,
+        isLoading: registrosQuery.isLoading || petsQuery.isLoading,
+        isSaving: criarRegistro.isPending || atualizarRegistro.isPending,
+        isDeleting: excluirRegistro.isPending,
+        isError: registrosQuery.isError || petsQuery.isError,
+        atualizarCampo,
         selecionarPet,
+        iniciarNovoRegistro,
+        editarRegistro,
         formatarData,
         salvarProntuario,
+        excluirProntuario,
     };
 }

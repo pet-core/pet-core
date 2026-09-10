@@ -13,6 +13,7 @@ export const API_ROUTES = {
     },
     users: {
         me: "/users/me",
+        list: "/users",
     },
     pets: {
         list: "/pets",
@@ -21,5 +22,9 @@ export const API_ROUTES = {
     clinicalRecords: {
         list: "/clinical-records",
         detail: (id: string) => `/clinical-records/${id}`,
+    },
+    protocolos: {
+        list: "/protocolos",
+        detail: (id: string) => `/protocolos/${id}`,
     },
 } as const;

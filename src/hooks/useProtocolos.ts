@@ -1,73 +1,49 @@
-import { useState, useEffect } from "react";
-import { getUsuarioLogado } from "../services/authStorage";
-import { getTutores } from "../services/userService";
-import { getPetsByTutor } from "../services/petService";
-import { addClinicalRecord } from "../services/clinicalRecordService";
-import { KEYS } from "../services/storage";
-import type { Usuario, Pet, Protocolo, RegistroClinico } from "../types/models";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useCriarClinicalRecord } from "./api/useClinicalRecords";
+import { usePets } from "./api/usePets";
+import { useTutores } from "./api/useUsers";
+import { useProtocolosApi } from "./api/useProtocolos";
+import type { Pet, Protocolo, RegistroClinico } from "../types/models";
+
+type UsuarioSemSenha = Omit<NonNullable<ReturnType<typeof useAuth>["usuario"]>, "senha">;
 
 export function useProtocolos() {
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
+    const { usuario } = useAuth();
+    const tutoresQuery = useTutores();
+    const protocolosQuery = useProtocolosApi();
+    const criarRegistro = useCriarClinicalRecord();
 
-    const [tutores, setTutores] = useState<Usuario[]>([]);
-
-    const [tutorSelecionado, setTutorSelecionado] = useState<Usuario | null>(null);
-
-    const [petsDoTutor, setPetsDoTutor] = useState<Pet[]>([]);
-
+    const [tutorSelecionado, setTutorSelecionado] = useState<UsuarioSemSenha | null>(null);
     const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
-
     const [protocoloSelecionado, setProtocoloSelecionado] = useState<Protocolo | null>(null);
-
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-
     const [mensagem, setMensagem] = useState("");
-
     const [modalTutor, setModalTutor] = useState(false);
-
     const [modalPet, setModalPet] = useState(false);
 
-    useEffect(() => {
-            buscarDados();
-        }, []);
-
-    async function buscarDados() {
-        const user = await getUsuarioLogado();
-        const tutoresDisponiveis = await getTutores();
-
-        if (user !== null) {
-            setUsuario(user);
-        }
-
-        setTutores(tutoresDisponiveis);
-    }
-
-    async function buscarPetsDoTutor(tutorId: string) {
-        setPetsDoTutor(await getPetsByTutor(tutorId));
-    }
+    const petsQuery = usePets(tutorSelecionado?.id, Boolean(tutorSelecionado?.id));
 
     function abrirFormulario(protocolo: Protocolo) {
-            setProtocoloSelecionado(protocolo);
-            setMostrarFormulario(true);
-            setTutorSelecionado(null);
-            setPetSelecionado(null);
-            setPetsDoTutor([]);
-            setMensagem("");
-        }
+        setProtocoloSelecionado(protocolo);
+        setMostrarFormulario(true);
+        setTutorSelecionado(null);
+        setPetSelecionado(null);
+        setMensagem("");
+    }
 
-    function selecionarTutor(item: Usuario) {
-            setTutorSelecionado(item);
-            setPetSelecionado(null);
-            setMensagem("");
-            setModalTutor(false);
-            buscarPetsDoTutor(item.id);
-        }
+    function selecionarTutor(item: UsuarioSemSenha) {
+        setTutorSelecionado(item);
+        setPetSelecionado(null);
+        setMensagem("");
+        setModalTutor(false);
+    }
 
     function selecionarPet(item: Pet) {
-            setPetSelecionado(item);
-            setMensagem("");
-            setModalPet(false);
-        }
+        setPetSelecionado(item);
+        setMensagem("");
+        setModalPet(false);
+    }
 
     async function enviarProtocolo() {
         if (!protocoloSelecionado || !tutorSelecionado || !petSelecionado) {
@@ -81,7 +57,7 @@ export function useProtocolos() {
         }
 
         const novoProtocolo: RegistroClinico = {
-            id: `${Date.now()}`,
+            id: "",
             tutorId: tutorSelecionado.id,
             tutorNome: tutorSelecionado.nome,
             petId: petSelecionado.id,
@@ -93,29 +69,30 @@ export function useProtocolos() {
             dataEnvio: new Date().toLocaleDateString("pt-BR"),
         };
 
-        await addClinicalRecord(KEYS.PROTOCOLOS_ENVIADOS, novoProtocolo);
-
-        setMensagem("Protocolo enviado para o tutor.");
-        setMostrarFormulario(false);
-        setProtocoloSelecionado(null);
-        setTutorSelecionado(null);
-        setPetSelecionado(null);
-        setPetsDoTutor([]);
+        try {
+            const { id: _id, ...dados } = novoProtocolo;
+            await criarRegistro.mutateAsync(dados);
+            setMensagem("Protocolo enviado para o tutor.");
+            setMostrarFormulario(false);
+            setProtocoloSelecionado(null);
+            setTutorSelecionado(null);
+            setPetSelecionado(null);
+        } catch {
+            setMensagem("Não foi possível enviar o protocolo. Tente novamente.");
+        }
     }
 
     return {
         usuario,
-        setUsuario,
-        tutores,
-        setTutores,
+        tutores: tutoresQuery.data ?? [],
         tutorSelecionado,
         setTutorSelecionado,
-        petsDoTutor,
-        setPetsDoTutor,
+        petsDoTutor: petsQuery.data ?? [],
         petSelecionado,
         setPetSelecionado,
         protocoloSelecionado,
         setProtocoloSelecionado,
+        protocolos: protocolosQuery.data ?? [],
         mostrarFormulario,
         setMostrarFormulario,
         mensagem,
@@ -124,11 +101,18 @@ export function useProtocolos() {
         setModalTutor,
         modalPet,
         setModalPet,
-        buscarDados,
-        buscarPetsDoTutor,
+        buscarDados: () => void Promise.all([tutoresQuery.refetch(), protocolosQuery.refetch()]),
+        buscarPetsDoTutor: () => void petsQuery.refetch(),
         abrirFormulario,
         selecionarTutor,
         selecionarPet,
         enviarProtocolo,
+        carregandoProtocolos: protocolosQuery.isLoading,
+        carregandoTutores: tutoresQuery.isLoading,
+        carregandoPets: petsQuery.isLoading,
+        enviandoProtocolo: criarRegistro.isPending,
+        erroProtocolos: protocolosQuery.error,
+        erroTutores: tutoresQuery.error,
+        erroPets: petsQuery.error,
     };
 }

@@ -1,10 +1,9 @@
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Modal } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { protocolos } from "../../data/mockData";
 import { useProtocolos } from "../../hooks/useProtocolos";
 import { useAppNavigation } from "../../types";
 export default function Protocolos() {
-    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, protocoloSelecionado, setProtocoloSelecionado, mostrarFormulario, setMostrarFormulario, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, abrirFormulario, selecionarTutor, selecionarPet, enviarProtocolo } = useProtocolos();
+    const { tutores, tutorSelecionado, petsDoTutor, petSelecionado, protocoloSelecionado, mostrarFormulario, setMostrarFormulario, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, abrirFormulario, selecionarTutor, selecionarPet, enviarProtocolo, protocolos, carregandoProtocolos, carregandoTutores, carregandoPets, enviandoProtocolo, erroProtocolos, erroTutores, erroPets } = useProtocolos();
 
     const navigation = useAppNavigation();
 
@@ -33,15 +32,17 @@ export default function Protocolos() {
                             <Ionicons name="chevron-down" size={20} color="#7167F6"/>
                         </TouchableOpacity>
     
-                        <TouchableOpacity style={styles.btn} onPress={enviarProtocolo}>
+                        <TouchableOpacity style={[styles.btn, enviandoProtocolo && styles.btnDesabilitado]} onPress={enviarProtocolo} disabled={enviandoProtocolo}>
                             <Ionicons name="send" size={18} color="#fff"/>
-                            <Text style={styles.textoBtn}>Enviar protocolo</Text>
+                            <Text style={styles.textoBtn}>{enviandoProtocolo ? "Enviando..." : "Enviar protocolo"}</Text>
                         </TouchableOpacity>
     
                         <Modal visible={modalTutor} transparent animationType="slide">
                             <View style={styles.modalOverlay}>
                                 <View style={styles.modalBox}>
                                     <Text style={styles.modalTitulo}>Selecionar tutor</Text>
+                                    {carregandoTutores ? <Text style={styles.modalItemSubtexto}>Carregando tutores...</Text> : null}
+                                    {erroTutores ? <Text style={styles.modalItemSubtexto}>Não foi possível carregar os tutores.</Text> : null}
                                     {tutores.map((item) => (
                                         <TouchableOpacity key={item.id} style={styles.modalItem} onPress={() => selecionarTutor(item)}>
                                             <Text style={styles.modalItemTexto}>{item.nome}</Text>
@@ -59,7 +60,9 @@ export default function Protocolos() {
                             <View style={styles.modalOverlay}>
                                 <View style={styles.modalBox}>
                                     <Text style={styles.modalTitulo}>Selecionar pet</Text>
-                                    {petsDoTutor.length === 0 && (
+                                    {carregandoPets && <Text style={styles.modalItemSubtexto}>Carregando pets...</Text>}
+                                    {erroPets && <Text style={styles.modalItemSubtexto}>Não foi possível carregar os pets.</Text>}
+                                    {!carregandoPets && petsDoTutor.length === 0 && (
                                         <Text style={styles.modalItemSubtexto}>
                                         Selecione um tutor com pets cadastrados.
                                         </Text>
@@ -81,6 +84,8 @@ export default function Protocolos() {
                     </View>
                 )}
     
+                {carregandoProtocolos && <Text style={styles.mensagem}>Carregando protocolos...</Text>}
+                {erroProtocolos && <Text style={styles.mensagem}>Não foi possível carregar os protocolos.</Text>}
                 <FlatList data={protocolos} keyExtractor={(item) => item.id} renderItem={({ item }) => (
                     <View style={styles.card}>
                         <View style={styles.linhaTitulo}>
@@ -169,6 +174,10 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flexDirection: "row",
         gap: 8,
+    },
+
+    btnDesabilitado: {
+        opacity: 0.6,
     },
 
     textoBtn: {

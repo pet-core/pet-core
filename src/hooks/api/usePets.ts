@@ -20,11 +20,11 @@ export const petQueryKeys = {
     detail: (id: string) => ["pets", id] as const,
 };
 
-export function usePets(tutorId?: string): UseQueryResult<Pet[], Error> {
+export function usePets(tutorId?: string, enabled = true): UseQueryResult<Pet[], Error> {
     return useQuery({
         queryKey: [...petQueryKeys.all, { tutorId }],
         queryFn: () => listarPets(tutorId),
-        enabled: true,
+        enabled,
     });
 }
 

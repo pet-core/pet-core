@@ -5,7 +5,7 @@ import Footer from "../../components/Footer";
 import { useVetHome } from "../../hooks/useVetHome";
 import { useAppNavigation } from "../../types";
 export default function Home() {
-    const { usuario, setUsuario, buscarUsuario } = useVetHome();
+    const { usuario } = useVetHome();
 
     const navigation = useAppNavigation();
 

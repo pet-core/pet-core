@@ -1,37 +1,33 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useClinicalRecords } from "./api/useClinicalRecords";
 import type { RegistroClinico } from "../types/models";
-import { getUsuarioLogado } from "../services/authStorage";
-import { getClinicalRecords } from "../services/clinicalRecordService";
-import { KEYS } from "../services/storage";
 
 export function useAvisos() {
-    const [avisos, setAvisos] = useState<RegistroClinico[]>([]);
-
+    const { usuario } = useAuth();
+    const registrosQuery = useClinicalRecords();
     const [cardAberto, setCardAberto] = useState<string | null>(null);
 
-    useEffect(() => {
-            buscarAvisos();
-        }, []);
+    const avisos = useMemo<RegistroClinico[]>(() => {
+        if (!usuario) return [];
 
-    async function buscarAvisos() {
-        const usuario = await getUsuarioLogado();
-
-        if (usuario !== null) {
-            const lista = await getClinicalRecords(KEYS.PROTOCOLOS_ENVIADOS);
-            setAvisos(lista.filter((item) => item.tutorId === usuario.id));
-        }
-    }
+        return (registrosQuery.data ?? []).filter(
+            (item) => item.tipoRegistro === "protocolo" && item.tutorId === usuario.id,
+        );
+    }, [registrosQuery.data, usuario]);
 
     function abrirCard(id: string) {
-            setCardAberto(cardAberto === id ? null : id);
-        }
+        setCardAberto((atual) => (atual === id ? null : id));
+    }
 
     return {
         avisos,
-        setAvisos,
         cardAberto,
         setCardAberto,
-        buscarAvisos,
+        buscarAvisos: registrosQuery.refetch,
         abrirCard,
+        carregando: registrosQuery.isLoading,
+        atualizando: registrosQuery.isFetching,
+        erro: registrosQuery.error,
     };
 }

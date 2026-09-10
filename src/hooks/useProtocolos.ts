@@ -64,6 +64,7 @@ export function useProtocolos() {
             petNome: petSelecionado.nome,
             veterinarioId: usuario.id,
             veterinarioNome: usuario.nome,
+            tipoRegistro: "protocolo",
             titulo: protocoloSelecionado.titulo,
             texto: protocoloSelecionado.texto,
             dataEnvio: new Date().toLocaleDateString("pt-BR"),

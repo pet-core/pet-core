@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { Usuario, Clinica } from "../types/models";
-import { emailJaCadastrado, salvarUsuario } from "../services/authStorage";
+import type { Clinica } from "../types/models";
+import { cadastrar as cadastrarApi } from "../services/api/authApiService";
 
 export function useCadastro() {
     const [nome, setNome] = useState("");
@@ -36,6 +36,8 @@ export function useCadastro() {
     const [modalEspecializacao, setModalEspecializacao] = useState(false);
 
     const [modalClinica, setModalClinica] = useState(false);
+
+    const [carregando, setCarregando] = useState(false);
 
     function mostrarMensagem(tipo: string, texto: string) {
             setTipoMensagem(tipo);
@@ -102,31 +104,33 @@ export function useCadastro() {
             return;
         }
 
-        const existeEmail = await emailJaCadastrado(email);
-        if (existeEmail) {
-            mostrarMensagem("erro", "Este e-mail já está cadastrado");
-            return;
+        try {
+            setCarregando(true);
+            setMensagem("");
+
+            const request = {
+                nome: nome.trim(),
+                email: email.trim(),
+                senha,
+                tipoPerfil: isVeterinario ? "veterinario" as const : "tutor" as const,
+                nascimento,
+                telefone,
+                genero,
+                especializacao: isVeterinario ? especializacao : undefined,
+                clinica: isVeterinario ? (clinica || nomeClinica) : undefined,
+                cnpj: isVeterinario ? cnpj : undefined,
+                nomeClinica: isVeterinario ? (nomeClinica || clinica) : undefined,
+                cep: isVeterinario ? cep : undefined,
+                complemento: isVeterinario ? complemento : undefined,
+            };
+
+            await cadastrarApi(request);
+            mostrarMensagem("sucesso", "Cadastro realizado com sucesso!");
+        } catch {
+            mostrarMensagem("erro", "Não foi possível realizar o cadastro. Verifique os dados e tente novamente.");
+        } finally {
+            setCarregando(false);
         }
-
-        const novoUsuario: Usuario = {
-            id: isVeterinario ? `VET${Date.now()}` : `${Date.now()}`,
-            nome: nome.trim(),
-            nascimento,
-            telefone,
-            genero,
-            email,
-            senha,
-            tipoPerfil: isVeterinario ? "veterinario" : "tutor",
-            especializacao,
-            clinica: clinica || nomeClinica,
-            cnpj,
-            nomeClinica: nomeClinica || clinica,
-            cep,
-            complemento,
-        };
-
-        await salvarUsuario(novoUsuario);
-        mostrarMensagem("sucesso", "Cadastro realizado com sucesso!");
     }
 
     return {
@@ -170,5 +174,6 @@ export function useCadastro() {
         formatarData,
         formatarTelefone,
         cadastrar,
+        carregando,
     };
 }

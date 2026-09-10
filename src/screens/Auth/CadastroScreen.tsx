@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCadastro } from "../../hooks/useCadastro";
 import { useAppNavigation } from "../../types";
 export default function Cadastro() {
-    const { nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, isVeterinario, setIsVeterinario, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, nomeClinica, setNomeClinica, cep, setCep, complemento, setComplemento, mensagem, setMensagem, tipoMensagem, setTipoMensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, mostrarMensagem, selecionarClinica, limparClinicaSelecionada, formatarData, formatarTelefone, cadastrar } = useCadastro();
+    const { nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, isVeterinario, setIsVeterinario, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, nomeClinica, setNomeClinica, cep, setCep, complemento, setComplemento, mensagem, setMensagem, tipoMensagem, setTipoMensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, mostrarMensagem, selecionarClinica, limparClinicaSelecionada, formatarData, formatarTelefone, cadastrar, carregando } = useCadastro();
 
     const navigation = useAppNavigation();
 
@@ -103,7 +103,7 @@ export default function Cadastro() {
                             </View>
                         )}
     
-                    <TouchableOpacity style={styles.btn} onPress={cadastrar}><Text style={styles.textoBtn}>Cadastrar</Text></TouchableOpacity>
+                    <TouchableOpacity style={[styles.btn, carregando && styles.btnDesabilitado]} onPress={cadastrar} disabled={carregando}><Text style={styles.textoBtn}>{carregando ? "Cadastrando..." : "Cadastrar"}</Text></TouchableOpacity>
     
                     <View style={styles.areaLogin}>
                         <Text style={styles.textoLogin}>Já tem cadastro? </Text>
@@ -385,6 +385,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginTop: 12,
+    },
+
+    btnDesabilitado: {
+        opacity: 0.6,
     },
 
     textoBtn: {

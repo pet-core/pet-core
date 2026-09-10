@@ -81,35 +81,52 @@ Gerenciamento de rotas utilizando React Navigation (Native Stack), em uma pilha 
 Visualização de dados dos pets cadastrados.
 
 ## 🗂 Estrutura de pastas
-```
-App.tsx                      -> entry point, monta o NavigationContainer
+```text
+App.tsx                      -> entry point e composição dos providers
 src/
-  navigation/
-    AppNavigator.tsx         -> Stack único com todas as telas do app
-  screens/
-    Auth/                    -> Login, Cadastro
-    Common/                  -> Erro
-    Tutor/                   -> telas do perfil tutor
-    Vet/                     -> telas do perfil veterinário
-    SplashScreen.tsx
-  hooks/                     -> lógica de cada tela (state, handlers, side-effects), em .ts
-  services/
-    storage.ts                -> acesso de baixo nível ao armazenamento local
-    authStorage.ts            -> operações de autenticação/sessão da etapa local
-    userService.ts            -> consultas de usuários/tutores
-    petService.ts             -> operações de pets
-    clinicalRecordService.ts  -> operações de registros clínicos
-  data/
-    mockData.ts                -> dados iniciais da etapa local (serão removidos na integração com API)
-  types/
-    models.ts                  -> tipos de domínio (Usuario, Pet, Clinica, Protocolo...)
-    navigation.ts               -> RootStackParamList (tipagem das rotas)
-  components/                 -> Header, Footer, PetCard (.tsx)
+  api/                       -> cliente Axios e rotas HTTP
+  context/                   -> sessão/autenticação da aplicação
+  navigation/                -> React Navigation e rotas protegidas por perfil
+  screens/                   -> apresentação e interação das telas
+  hooks/                     -> estado e regras de apresentação/orquestração
+  hooks/api/                 -> hooks TanStack Query dos recursos da API
+  services/api/              -> acesso HTTP por recurso
+  services/authStorage.ts    -> persistência exclusiva da sessão autenticada
+  types/                     -> contratos de domínio, API e navegação
+  providers/                 -> configuração global do TanStack Query
+  components/                -> componentes visuais reutilizáveis
 ```
-Cada tela segue o padrão **View + Hook**: o arquivo em `src/screens` cuida apenas
-da renderização (JSX/estilos) e o hook correspondente em `src/hooks`
-concentra estado, chamadas ao AsyncStorage e regras de navegação. Todo o
-projeto é escrito em TypeScript; rode `npm run typecheck` para validar os tipos.
+
+A arquitetura separa **UI, lógica de tela, dados e infraestrutura**. As telas não fazem
+requisições HTTP diretamente: os hooks orquestram o estado e os serviços em
+`src/services/api` encapsulam o acesso ao backend. Axios é o único cliente HTTP e
+TanStack Query gerencia consultas, mutações, cache, invalidação e estados de carregamento.
+
+O `AsyncStorage` é utilizado somente para manter a sessão autenticada entre aberturas
+do aplicativo. Dados funcionais de pets, usuários, prontuários, exames, receitas,
+protocolos, avisos e relatórios são obtidos pela API. Não há dados de `mockData` em uso.
+
+## 🔐 Autenticação e navegação
+
+- `POST /auth/login` realiza o login real e retorna token + usuário.
+- `POST /auth/register` realiza o cadastro real.
+- O token é enviado automaticamente como `Authorization: Bearer ...` pelo cliente Axios.
+- A sessão é restaurada ao iniciar o aplicativo.
+- Rotas públicas ficam disponíveis somente sem sessão.
+- Rotas de tutor e veterinário são expostas conforme `tipoPerfil`.
+- Logout remove a sessão persistida e retorna ao fluxo público.
+
+## 🌐 API
+
+Configure a URL do backend em `.env`:
+
+```env
+EXPO_PUBLIC_API_URL=https://seu-backend.exemplo.com
+```
+
+Os contratos e endpoints esperados estão documentados em `README_SPRINT3_API.md`.
+Quando o backend definitivo estiver disponível, seus contratos devem substituir os
+contratos esquemáticos sem reintroduzir dados simulados na interface.
 
 ## 🛠 Dependências principais
 - npx expo install @react-navigation/native @react-navigation/native-stack

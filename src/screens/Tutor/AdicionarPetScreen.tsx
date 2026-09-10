@@ -3,7 +3,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAdicionarPet } from "../../hooks/useAdicionarPet";
 import { useAppNavigation } from "../../types";
 export default function AdicionarPet() {
-    const { usuario, setUsuario, nome, setNome, nascimento, setNascimento, raca, setRaca, especie, setEspecie, porte, setPorte, pelagem, setPelagem, sexo, setSexo, mensagem, setMensagem, tipoMensagem, setTipoMensagem, buscarUsuario, mostrarMensagem, formatarData, salvarPet } = useAdicionarPet();
+    const { nome, setNome, nascimento, setNascimento, raca, setRaca, especie, setEspecie, porte, setPorte, pelagem, setPelagem, sexo, setSexo, mensagem, tipoMensagem, formatarData, salvarPet, isSaving } = useAdicionarPet();
 
     const navigation = useAppNavigation();
 
@@ -48,8 +48,8 @@ export default function AdicionarPet() {
                     </TouchableOpacity>
                 </View>
     
-                <TouchableOpacity style={styles.btn} onPress={salvarPet}>
-                    <Text style={styles.textoBtn}>Salvar pet</Text>
+                <TouchableOpacity style={styles.btn} onPress={() => void salvarPet()} disabled={isSaving}>
+                    <Text style={styles.textoBtn}>{isSaving ? "Salvando..." : "Salvar pet"}</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>

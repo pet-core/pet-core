@@ -1,42 +1,12 @@
-import { useState, useEffect } from "react";
-import { useRoute, type RouteProp } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../types/navigation";
-import type { Pet } from "../types/models";
-import { getPetById, updatePet } from "../services/petService";
+import { useAtualizarPet, useExcluirPet, usePet } from "./api/usePets";
 
 export function usePetDetalhe() {
-    const route = useRoute<RouteProp<RootStackParamList, "TutorPetDetalhe">>();
-
-    const { petId } = route.params;
-
-    const [pet, setPet] = useState<Pet | null>(null);
-
-    useEffect(() => {
-            buscarPet();
-        }, []);
-
-    async function buscarPet() {
-        setPet(await getPetById(petId));
-    }
-
-    async function alterarObito() {
-        if (!pet) {
-            return;
-        }
-
-        const petAtualizado: Pet = {
-            ...pet,
-            obitoInformado: !pet.obitoInformado,
-        };
-
-        await updatePet(petAtualizado);
-        setPet(petAtualizado);
-    }
-
-    return {
-        pet,
-        setPet,
-        buscarPet,
-        alterarObito,
-    };
+    const { petId } = useRoute<RouteProp<RootStackParamList, "TutorPetDetalhe">>().params;
+    const petQuery = usePet(petId); const atualizar = useAtualizarPet(); const excluir = useExcluirPet();
+    async function alterarObito() { if (!petQuery.data) return; await atualizar.mutateAsync({ id:petQuery.data.id, dados:{...petQuery.data, obitoInformado:!petQuery.data.obitoInformado} }); }
+    async function excluirPet() { await excluir.mutateAsync(petId); }
+    return { pet:petQuery.data ?? null,isLoading:petQuery.isLoading,error:petQuery.error,refetch:petQuery.refetch,alterarObito,excluirPet,isUpdating:atualizar.isPending,isDeleting:excluir.isPending };
 }

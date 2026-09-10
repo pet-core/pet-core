@@ -5,7 +5,7 @@ import Footer from "../../components/Footer";
 import { useTutorHome } from "../../hooks/useTutorHome";
 import { useAppNavigation } from "../../types";
 export default function Home() {
-    const { usuario, setUsuario, pets, setPets, buscarDados, abrirPet } = useTutorHome();
+    const { usuario, pets, abrirPet, isLoading, error, isRefreshing, refetch } = useTutorHome();
 
     const navigation = useAppNavigation();
 
@@ -15,7 +15,7 @@ export default function Home() {
                 <Text style={styles.boasVindas}>Olá, {usuario?.nome}</Text>
                 <Text style={styles.subtitulo}>Meus pets</Text>
     
-                <FlatList data={pets} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>Nenhum pet cadastrado.</Text>} renderItem={({ item }) => (
+                <FlatList refreshing={isRefreshing} onRefresh={() => void refetch()} data={pets} keyExtractor={(item) => item.id} ListEmptyComponent={isLoading ? <Text style={styles.vazio}>Carregando pets...</Text> : error ? <View><Text style={styles.vazio}>Não foi possível carregar os pets.</Text><TouchableOpacity onPress={() => void refetch()}><Text style={styles.tentar}>Tentar novamente</Text></TouchableOpacity></View> : <Text style={styles.vazio}>Nenhum pet cadastrado.</Text>} renderItem={({ item }) => (
                     <TouchableOpacity style={styles.petCard} onPress={() => abrirPet(item)}>
                         <View style={styles.petImagem}>
                             <MaterialCommunityIcons name="paw" size={30} color="#7167F6"/>
@@ -84,6 +84,8 @@ const styles = StyleSheet.create({
         color: "#666",
         marginBottom: 10,
     },
+
+    tentar: { color: "#7167F6", marginHorizontal: 22, marginBottom: 10 },
 
     petCard: {
         backgroundColor: "#7167F6",

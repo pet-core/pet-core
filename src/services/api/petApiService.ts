@@ -3,8 +3,10 @@ import { API_ROUTES } from "../../api/routes";
 import type { Pet } from "../../types/models";
 import type { PetCreateRequest, PetUpdateRequest } from "../../types/api";
 
-export async function listarPets(): Promise<Pet[]> {
-    const response = await apiClient.get<Pet[]>(API_ROUTES.pets.list);
+export async function listarPets(tutorId?: string): Promise<Pet[]> {
+    const response = await apiClient.get<Pet[]>(API_ROUTES.pets.list, {
+        params: tutorId ? { tutorId } : undefined,
+    });
     return response.data;
 }
 

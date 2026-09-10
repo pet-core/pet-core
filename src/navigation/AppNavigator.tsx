@@ -15,6 +15,7 @@ import TutorComedouroScreen from "../screens/Tutor/ComedouroScreen";
 import TutorExamesScreen from "../screens/Tutor/ExamesScreen";
 import TutorHistoricoScreen from "../screens/Tutor/HistoricoScreen";
 import TutorPetDetalheScreen from "../screens/Tutor/PetDetalheScreen";
+import TutorEditarPetScreen from "../screens/Tutor/EditarPetScreen";
 import TutorReceitasScreen from "../screens/Tutor/ReceitasScreen";
 
 import VetHomeScreen from "../screens/Vet/HomeScreen";
@@ -49,6 +50,7 @@ export default function AppNavigator() {
             <Stack.Screen name="TutorExames" component={TutorExamesScreen} />
             <Stack.Screen name="TutorHistorico" component={TutorHistoricoScreen} />
             <Stack.Screen name="TutorPetDetalhe" component={TutorPetDetalheScreen} />
+            <Stack.Screen name="TutorEditarPet" component={TutorEditarPetScreen} />
             <Stack.Screen name="TutorReceitas" component={TutorReceitasScreen} />
 
             <Stack.Screen name="VetHome" component={VetHomeScreen} />

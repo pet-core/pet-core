@@ -13,6 +13,7 @@ export type RootStackParamList = {
     TutorExames: undefined;
     TutorHistorico: undefined;
     TutorPetDetalhe: { petId: string };
+    TutorEditarPet: { petId: string };
     TutorReceitas: undefined;
 
     VetHome: undefined;

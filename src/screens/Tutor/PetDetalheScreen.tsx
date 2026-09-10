@@ -1,13 +1,17 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
+import { Alert, ActivityIndicator, StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { usePetDetalhe } from "../../hooks/usePetDetalhe";
 import { useAppNavigation } from "../../types";
 export default function PetDetalhe() {
-    const { pet, setPet, buscarPet, alterarObito } = usePetDetalhe();
+    const { pet, isLoading, error, alterarObito, excluirPet, isUpdating, isDeleting } = usePetDetalhe();
 
     const navigation = useAppNavigation();
 
-    if (!pet) {
+    if (isLoading) {
+        return <View style={styles.loading}><ActivityIndicator size="large" color="#7167F6" /><Text>Carregando pet...</Text></View>;
+    }
+
+    if (error || !pet) {
             return (
                 <View style={styles.container}>
                     <Text style={styles.titulo}>Pet não encontrado</Text>
@@ -40,13 +44,21 @@ export default function PetDetalhe() {
                     <Text style={styles.valor}>{pet.obitoInformado ? "Óbito informado" : "Ativo"}</Text>
                 </View>
     
-                <TouchableOpacity style={styles.checkboxArea} onPress={alterarObito}>
+                <TouchableOpacity style={styles.checkboxArea} onPress={() => void alterarObito()} disabled={isUpdating}>
                     <View style={styles.checkbox}>
                         {pet.obitoInformado && <Ionicons name="checkmark" size={18} color="#7167F6" />}
                     </View>
                     <Text style={styles.textoCheckbox}>Informar óbito do pet</Text>
                 </TouchableOpacity>
     
+                <TouchableOpacity style={styles.btnEditar} onPress={() => navigation.navigate("TutorEditarPet", { petId: pet.id })}>
+                    <Text style={styles.textoEditar}>Editar pet</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.btnExcluir} onPress={() => Alert.alert("Excluir pet", "Tem certeza que deseja excluir este pet?", [{ text: "Cancelar", style: "cancel" }, { text: "Excluir", style: "destructive", onPress: () => void excluirPet().then(() => navigation.replace("TutorHome")) }])} disabled={isDeleting}>
+                    <Text style={styles.textoExcluir}>{isDeleting ? "Excluindo..." : "Excluir pet"}</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>
                     <Text style={styles.textoVoltar}>Voltar</Text>
                 </TouchableOpacity>
@@ -54,6 +66,8 @@ export default function PetDetalhe() {
         );
 }
 const styles = StyleSheet.create({
+    loading: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
+
     container: {
         flexGrow: 1,
         backgroundColor: "#fff",
@@ -117,6 +131,12 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
     },
+
+    btnEditar: { backgroundColor: "#7167F6", alignItems: "center", paddingVertical: 13, borderRadius: 8, marginTop: 20 },
+    textoEditar: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+
+    btnExcluir: { borderWidth: 1, borderColor: "#EF4444", alignItems: "center", paddingVertical: 13, borderRadius: 8, marginTop: 10 },
+    textoExcluir: { color: "#EF4444", fontWeight: "bold", fontSize: 16 },
 
     btnVoltar: {
         alignItems: "center",

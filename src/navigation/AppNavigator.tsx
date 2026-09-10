@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../types/navigation";
 
 import SplashScreen from "../screens/SplashScreen";
 import LoginScreen from "../screens/Auth/LoginScreen";
@@ -25,7 +26,7 @@ import VetProtocolosScreen from "../screens/Vet/ProtocolosScreen";
 import VetReceitasScreen from "../screens/Vet/ReceitasScreen";
 import VetRelatoriosScreen from "../screens/Vet/RelatoriosScreen";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Stack única e "flat", igual à navegação que já existia no expo-router
 // (não havia layouts aninhados: era tudo uma pilha só). Proteção de rotas

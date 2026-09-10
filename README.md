@@ -128,3 +128,14 @@ Caso tenha dúvidas, sugestões ou interesse em conhecer mais sobre o projeto, f
 - [Carolina Nascimento Gonçalves](http://linkedin.com/in/carolina-nascimento-906274364)
 - [Emanuelly Ventura do Nascimento](https://www.linkedin.com/in/emanuelly-ventura-966135355) 
 - [Julia Sayuri Kina](https://www.linkedin.com/in/julia-kina)
+## Infraestrutura HTTP e cache
+
+A aplicação possui um cliente Axios centralizado em `src/api/client.ts` e o TanStack Query configurado em `src/providers/QueryProvider.tsx`.
+
+A URL do backend será informada quando os endpoints estiverem disponíveis:
+
+```bash
+EXPO_PUBLIC_API_URL=https://sua-api.example.com
+```
+
+As telas não devem criar instâncias de Axios nem realizar chamadas HTTP diretamente. As requisições futuras serão encapsuladas nos serviços e consumidas por hooks do TanStack Query.

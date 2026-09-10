@@ -26,6 +26,8 @@ export interface AtualizarUsuarioRequest {
     complemento?: string;
     telefone?: string;
     genero?: string;
+    email?: string;
+    senha?: string;
     nascimento?: string;
 }
 

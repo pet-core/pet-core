@@ -2,7 +2,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, ScrollView, View, Image 
 import { useTutorAlterarDados } from "../../hooks/useTutorAlterarDados";
 import { useAppNavigation } from "../../types";
 export default function AlterarDados() {
-    const { usuario, setUsuario, nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, confirmarSenha, setConfirmarSenha, mensagem, setMensagem, buscarUsuario, formatarData, formatarTelefone, salvar } = useTutorAlterarDados();
+    const { nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, confirmarSenha, setConfirmarSenha, mensagem, formatarData, formatarTelefone, carregando, salvando, erroUsuario, salvar } = useTutorAlterarDados();
 
     const navigation = useAppNavigation();
 
@@ -10,7 +10,7 @@ export default function AlterarDados() {
             <ScrollView contentContainerStyle={styles.container}>
                 <Image source={require("../../../assets/avatar-default.png")} style={styles.avatar}/>
                 <Text style={styles.titulo}>Alterar dados</Text>
-                {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
+                {(mensagem !== "" || erroUsuario) && <Text style={styles.mensagem}>{mensagem || "Não foi possível carregar seus dados."}</Text>}
                 <TextInput placeholder="Nome" style={styles.input} value={nome} onChangeText={setNome}/>
     
                 <TextInput placeholder="Data de nascimento" style={styles.input} value={nascimento} keyboardType="numeric" maxLength={10} onChangeText={(value) => setNascimento(formatarData(value))}/>
@@ -30,8 +30,8 @@ export default function AlterarDados() {
                 <TextInput placeholder="Nova senha" style={styles.input} value={senha} secureTextEntry onChangeText={setSenha}/>
                 <TextInput placeholder="Confirmar nova senha" style={styles.input} value={confirmarSenha} secureTextEntry onChangeText={setConfirmarSenha}/>
     
-                <TouchableOpacity style={styles.btn} onPress={salvar}>
-                    <Text style={styles.textoBtn}>Salvar</Text>
+                <TouchableOpacity style={styles.btn} onPress={salvar} disabled={carregando || salvando}>
+                    <Text style={styles.textoBtn}>{salvando ? "Salvando..." : carregando ? "Carregando..." : "Salvar"}</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.replace("TutorHome")}>

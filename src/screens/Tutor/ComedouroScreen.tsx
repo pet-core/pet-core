@@ -3,7 +3,7 @@ import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useComedouro } from "../../hooks/useComedouro";
 import { useAppNavigation } from "../../types";
 export default function Comedouro() {
-    const { pets, setPets, petAberto, setPetAberto, mensagem, setMensagem, buscarPets, abrirPet, encherComedouro } = useComedouro();
+    const { pets, petAberto, mensagem, abrirPet, encherComedouro, isLoading, isUpdating, error, buscarPets } = useComedouro();
 
     const navigation = useAppNavigation();
 
@@ -13,6 +13,8 @@ export default function Comedouro() {
                 <Text style={styles.titulo}>Comedouro inteligente</Text>
     
                 {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
+                {isLoading && <Text style={styles.estado}>Carregando pets...</Text>}
+                {error && <Text style={styles.erro}>Não foi possível carregar os pets. Tente novamente.</Text>}
     
                 <FlatList data={pets} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>Nenhum pet cadastrado.</Text>} renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} onPress={() => abrirPet(item.id)}>
@@ -42,15 +44,20 @@ export default function Comedouro() {
                                         Status do comedouro: {item.comedouroStatus === "cheio" ? "Cheio" : "Vazio"}
                                     </Text>
                                 </View>
-                                <TouchableOpacity style={item.comedouroStatus === "cheio" ? styles.btnCheio : styles.btnAtivo} onPress={() => encherComedouro(item.id)}>
+                                <TouchableOpacity style={item.comedouroStatus === "cheio" ? styles.btnCheio : styles.btnAtivo} onPress={() => encherComedouro(item.id)} disabled={isUpdating}>
                                     <Text style={styles.textoBtn}>
-                                        {item.comedouroStatus === "cheio" ? "Comedouro cheio" : "Encher"}
+                                        {isUpdating ? "Atualizando..." : item.comedouroStatus === "cheio" ? "Comedouro cheio" : "Encher"}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
                         )}
                     </TouchableOpacity>
                 )}/>
+                {error && (
+                    <TouchableOpacity style={styles.btnTentar} onPress={() => void buscarPets()}>
+                        <Text style={styles.textoVoltar}>Tentar novamente</Text>
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>
                     <Text style={styles.textoVoltar}>Voltar</Text>
                 </TouchableOpacity>
@@ -178,6 +185,27 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 17,
         fontWeight: "bold",
+    },
+
+    estado: {
+        color: "#666",
+        textAlign: "center",
+        marginBottom: 12,
+    },
+
+    erro: {
+        color: "#991B1B",
+        textAlign: "center",
+        marginBottom: 12,
+    },
+
+    btnTentar: {
+        backgroundColor: "#7167F6",
+        height: 44,
+        borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 10,
     },
 
     btnVoltar: {

@@ -1,60 +1,57 @@
-import { useState, useEffect } from "react";
-import type { Pet } from "../types/models";
-import { getUsuarioLogado } from "../services/authStorage";
-import { getPetsByTutor, updatePet } from "../services/petService";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useAtualizarPet, usePets } from "./api/usePets";
 
 export function useComedouro() {
-    const [pets, setPets] = useState<Pet[]>([]);
-
+    const { usuario } = useAuth();
+    const petsQuery = usePets(usuario?.id, Boolean(usuario?.id));
+    const atualizarPet = useAtualizarPet();
     const [petAberto, setPetAberto] = useState<string | null>(null);
-
     const [mensagem, setMensagem] = useState("");
 
-    useEffect(() => {
-            buscarPets();
-        }, []);
-
-    async function buscarPets() {
-        const usuario = await getUsuarioLogado();
-
-        if (usuario !== null) {
-            setPets(await getPetsByTutor(usuario.id));
-        }
-    }
+    const pets = petsQuery.data ?? [];
 
     function abrirPet(id: string) {
-            setPetAberto(petAberto === id ? null : id);
-            setMensagem("");
-        }
+        setPetAberto(petAberto === id ? null : id);
+        setMensagem("");
+    }
 
     async function encherComedouro(petId: string) {
         const petAtual = pets.find((pet) => pet.id === petId);
 
-        if (petAtual && petAtual.comedouroStatus === "cheio") {
+        if (!petAtual) return;
+
+        if (petAtual.comedouroStatus === "cheio") {
             setMensagem("O comedouro já está cheio.");
             return;
         }
 
-        if (petAtual) {
-            await updatePet({
-                ...petAtual,
-                comedouroStatus: "cheio",
+        try {
+            await atualizarPet.mutateAsync({
+                id: petAtual.id,
+                dados: {
+                    ...petAtual,
+                    comedouroStatus: "cheio",
+                },
             });
+            setMensagem("Comedouro preenchido com sucesso.");
+        } catch {
+            setMensagem("Não foi possível atualizar o comedouro.");
         }
-
-        setMensagem("Comedouro preenchido com sucesso.");
-        await buscarPets();
     }
 
     return {
         pets,
-        setPets,
         petAberto,
         setPetAberto,
         mensagem,
         setMensagem,
-        buscarPets,
+        buscarPets: petsQuery.refetch,
         abrirPet,
         encherComedouro,
+        isLoading: petsQuery.isLoading,
+        isRefreshing: petsQuery.isFetching && !petsQuery.isLoading,
+        isUpdating: atualizarPet.isPending,
+        error: petsQuery.error,
     };
 }

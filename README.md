@@ -124,7 +124,21 @@ Configure a URL do backend em `.env`:
 EXPO_PUBLIC_API_URL=https://seu-backend.exemplo.com
 ```
 
-Os contratos e endpoints esperados estão documentados em `README_SPRINT3_API.md`.
+Os contratos e endpoints esperados estão documentados em `docs/README_SPRINT3_API.md`.
+
+### Documentação
+
+A documentação específica do Sprint 3 está centralizada em [`docs/`](./docs/), mantendo a raiz do projeto mais limpa.
+
+Principais documentos:
+
+- [`CHECKLIST_FINAL`](./docs/README_SPRINT3_CHECKLIST_FINAL.md) — conferência dos requisitos do Sprint 3.
+- [`AUDITORIA`](./docs/README_SPRINT3_AUDITORIA.md) — auditoria de arquitetura, navegação e autenticação.
+- [`API`](./docs/README_SPRINT3_API.md) — contratos e endpoints esperados.
+- [`AUTH`](./docs/README_SPRINT3_AUTH.md) — autenticação e sessão.
+- [`HOOKS`](./docs/README_SPRINT3_HOOKS.md) — integração com TanStack Query.
+- [`ROUTES`](./docs/README_SPRINT3_ROUTES.md) — rotas e proteção de navegação.
+
 Quando o backend definitivo estiver disponível, seus contratos devem substituir os
 contratos esquemáticos sem reintroduzir dados simulados na interface.
 

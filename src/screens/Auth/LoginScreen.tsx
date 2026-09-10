@@ -5,7 +5,7 @@ import Footer from "../../components/Footer";
 import { useLogin } from "../../hooks/useLogin";
 import { useAppNavigation } from "../../types";
 export default function Login() {
-    const { email, setEmail, senha, setSenha, mensagem, setMensagem, tipoMensagem, setTipoMensagem, mostrarMensagem, entrar } = useLogin();
+    const { email, setEmail, senha, setSenha, mensagem, tipoMensagem, entrar, carregando } = useLogin();
 
     const navigation = useAppNavigation();
 
@@ -35,7 +35,7 @@ export default function Login() {
                         <TouchableOpacity onPress={() => navigation.navigate("Cadastro")}><Text style={styles.link}>Cadastre-se!</Text></TouchableOpacity>
                     </View>
     
-                    <TouchableOpacity style={styles.btn} onPress={entrar}><Text style={styles.textoBtn}>Entrar</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.btn} onPress={entrar} disabled={carregando}><Text style={styles.textoBtn}>{carregando ? "Entrando..." : "Entrar"}</Text></TouchableOpacity>
                 </View>
                 <Footer/>
             </SafeAreaView>

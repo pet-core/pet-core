@@ -1,30 +1,17 @@
 import { useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { useAppNavigation } from "../types";
-import type { Usuario } from "../types/models";
-import { KEYS, getData, initializeStorage } from "../services/storage";
+import { perfilInicial } from "../context/AuthContext";
 
 export function useSplash() {
     const navigation = useAppNavigation();
+    const { usuario, carregando } = useAuth();
 
     useEffect(() => {
-        iniciarApp();
-    }, []);
+        if (carregando) return;
+        const timer = setTimeout(() => navigation.replace(perfilInicial(usuario)), 400);
+        return () => clearTimeout(timer);
+    }, [carregando, usuario, navigation]);
 
-    async function iniciarApp() {
-        await initializeStorage();
-
-        const usuarioLogado = await getData<Usuario>(KEYS.USUARIO_LOGADO);
-
-        setTimeout(() => {
-            if (usuarioLogado === null) {
-                navigation.replace("Login");
-            } else if (usuarioLogado.tipoPerfil === "veterinario") {
-                navigation.replace("VetHome");
-            } else {
-                navigation.replace("TutorHome");
-            }
-        }, 700);
-    }
-
-    return {};
+    return { carregando };
 }

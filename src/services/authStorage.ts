@@ -1,43 +1,42 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Usuario } from "../types/models";
-import { KEYS, getData, removeData, setData } from "./storage";
 
-export async function getUsuarios(): Promise<Usuario[]> {
-    return (await getData<Usuario[]>(KEYS.USUARIOS)) ?? [];
+const TOKEN_KEY = "PETCORE_AUTH_TOKEN";
+const USER_KEY = "PETCORE_AUTH_USER";
+
+export interface AuthSession {
+    token: string;
+    usuario: Omit<Usuario, "senha">;
 }
 
-export async function findUsuarioByCredentials(email: string, senha: string): Promise<Usuario | null> {
-    const usuarios = await getUsuarios();
-    return usuarios.find((usuario) => usuario.email === email && usuario.senha === senha) ?? null;
+export async function salvarSessao(session: AuthSession): Promise<void> {
+    await AsyncStorage.multiSet([
+        [TOKEN_KEY, session.token],
+        [USER_KEY, JSON.stringify(session.usuario)],
+    ]);
 }
 
-export async function emailJaCadastrado(email: string): Promise<boolean> {
-    const usuarios = await getUsuarios();
-    return usuarios.some((usuario) => usuario.email === email);
+export async function obterToken(): Promise<string | null> {
+    return AsyncStorage.getItem(TOKEN_KEY);
 }
 
-export async function salvarUsuario(usuario: Usuario): Promise<void> {
-    const usuarios = await getUsuarios();
-    await setData(KEYS.USUARIOS, [...usuarios, usuario]);
-}
+export async function obterSessao(): Promise<AuthSession | null> {
+    const values = await AsyncStorage.multiGet([TOKEN_KEY, USER_KEY]);
+    const token = values[0][1];
+    const usuarioJson = values[1][1];
 
-export async function atualizarUsuario(usuarioAtualizado: Usuario): Promise<void> {
-    const usuarios = await getUsuarios();
-    const usuariosAtualizados = usuarios.map((usuario) =>
-        usuario.id === usuarioAtualizado.id ? usuarioAtualizado : usuario,
-    );
+    if (!token || !usuarioJson) {
+        return null;
+    }
 
-    await setData(KEYS.USUARIOS, usuariosAtualizados);
-    await setData(KEYS.USUARIO_LOGADO, usuarioAtualizado);
-}
-
-export async function getUsuarioLogado(): Promise<Usuario | null> {
-    return getData<Usuario>(KEYS.USUARIO_LOGADO);
-}
-
-export async function salvarSessao(usuario: Usuario): Promise<void> {
-    await setData(KEYS.USUARIO_LOGADO, usuario);
+    try {
+        return { token, usuario: JSON.parse(usuarioJson) as Omit<Usuario, "senha"> };
+    } catch {
+        await encerrarSessao();
+        return null;
+    }
 }
 
 export async function encerrarSessao(): Promise<void> {
-    await removeData(KEYS.USUARIO_LOGADO);
+    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
 }

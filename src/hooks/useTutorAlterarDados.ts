@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado, atualizarUsuario } from "../services/authStorage";
 import type { Usuario } from "../types/models";
 
 export function useTutorAlterarDados() {
@@ -26,20 +26,19 @@ export function useTutorAlterarDados() {
         }, []);
 
     async function buscarUsuario() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-    
-            if (usuarioStorage !== null) {
-                const user = JSON.parse(usuarioStorage);
-                setUsuario(user);
-                setNome(user.nome || "");
-                setNascimento(user.nascimento || "");
-                setTelefone(user.telefone || "");
-                setGenero(user.genero || "");
-                setEmail(user.email || "");
-                setSenha(user.senha || "");
-                setConfirmarSenha(user.senha || "");
-            }
+        const user = await getUsuarioLogado();
+
+        if (user !== null) {
+            setUsuario(user);
+            setNome(user.nome || "");
+            setNascimento(user.nascimento || "");
+            setTelefone(user.telefone || "");
+            setGenero(user.genero || "");
+            setEmail(user.email || "");
+            setSenha(user.senha || "");
+            setConfirmarSenha(user.senha || "");
         }
+    }
 
     function formatarData(texto: string) {
             let numeros = texto.replace(/\D/g, "");
@@ -59,48 +58,45 @@ export function useTutorAlterarDados() {
         }
 
     async function salvar() {
-            if (!nome || nome.trim() === "") {
-                setMensagem("Informe o nome.");
-                return;
-            }
-    
-            if (!email || email.trim() === "") {
-                setMensagem("Informe o e-mail.");
-                return;
-            }
-    
-            if (!senha || senha.trim() === "") {
-                setMensagem("Informe a senha.");
-                return;
-            }
-    
-            if (senha !== confirmarSenha) {
-                setMensagem("As senhas não conferem.");
-                return;
-            }
-    
-            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-            let usuarios: Usuario[] = usuariosStorage ? JSON.parse(usuariosStorage) : [];
-    
-            const usuarioAtualizado: Usuario = {
-                ...usuario!,
-                nome,
-                nascimento,
-                telefone,
-                genero,
-                email,
-                senha,
-            };
-    
-            usuarios = usuarios.map((item) => {
-                if (item.id === usuario?.id) return usuarioAtualizado;
-                return item;
-            });
-    
-            await AsyncStorage.setItem("USUARIOS", JSON.stringify(usuarios));
-            await AsyncStorage.setItem("USUARIO_LOGADO", JSON.stringify(usuarioAtualizado));
-            setMensagem("Dados atualizados com sucesso.");
+        if (!nome || nome.trim() === "") {
+            setMensagem("Informe o nome.");
+            return;
         }
+
+        if (!email || email.trim() === "") {
+            setMensagem("Informe o e-mail.");
+            return;
+        }
+
+        if (!senha || senha.trim() === "") {
+            setMensagem("Informe a senha.");
+            return;
+        }
+
+        if (senha !== confirmarSenha) {
+            setMensagem("As senhas não conferem.");
+            return;
+        }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const usuarioAtualizado: Usuario = {
+            ...usuario,
+            nome,
+            nascimento,
+            telefone,
+            genero,
+            email,
+            senha,
+        };
+
+        await atualizarUsuario(usuarioAtualizado);
+        setUsuario(usuarioAtualizado);
+        setMensagem("Dados atualizados com sucesso.");
+    }
 
     return {
         usuario,

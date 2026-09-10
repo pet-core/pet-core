@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getTutores } from "../services/userService";
+import { getPetsByTutor } from "../services/petService";
+import { addClinicalRecord } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useProntuario() {
@@ -34,22 +38,19 @@ export function useProntuario() {
         }, []);
 
     async function buscarDados() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-    
-            if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
-    
-            if (usuariosStorage !== null) {
-                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
-                setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
-            }
+        const user = await getUsuarioLogado();
+        const tutoresDisponiveis = await getTutores();
+
+        if (user !== null) {
+            setUsuario(user);
         }
 
+        setTutores(tutoresDisponiveis);
+    }
+
     async function buscarPetsDoTutor(tutorId: string) {
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
-            setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
-        }
+        setPetsDoTutor(await getPetsByTutor(tutorId));
+    }
 
     function selecionarTutor(item: Usuario) {
             setTutorSelecionado(item);
@@ -80,44 +81,44 @@ export function useProntuario() {
         }
 
     async function salvarProntuario() {
-            if (!tutorSelecionado || !petSelecionado || !dataConsulta) {
-                setMensagem("Selecione tutor, pet e informe a data da consulta.");
-                return;
-            }
-    
-            const storage = await AsyncStorage.getItem("PRONTUARIOS");
-            let prontuarios: RegistroClinico[] = storage ? JSON.parse(storage) : [];
-    
-            const novoProntuario: RegistroClinico = {
-                id: `${Date.now()}`,
-                tutorId: tutorSelecionado.id,
-                tutorNome: tutorSelecionado.nome,
-                petId: petSelecionado.id,
-                petNome: petSelecionado.nome,
-                veterinarioId: usuario!.id,
-                veterinarioNome: usuario!.nome,
-                dataConsulta,
-                temperatura,
-                peso,
-                tratamento,
-                observacoes,
-            };
-    
-            prontuarios.push(novoProntuario);
-    
-            await AsyncStorage.setItem("PRONTUARIOS", JSON.stringify(prontuarios));
-    
-            setMensagem("Prontuário salvo com sucesso.");
-    
-            setTutorSelecionado(null);
-            setPetsDoTutor([]);
-            setPetSelecionado(null);
-            setDataConsulta("");
-            setTemperatura("");
-            setPeso("");
-            setTratamento("");
-            setObservacoes("");
+        if (!tutorSelecionado || !petSelecionado || !dataConsulta) {
+            setMensagem("Selecione tutor, pet e informe a data da consulta.");
+            return;
         }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const novoProntuario: RegistroClinico = {
+            id: `${Date.now()}`,
+            tutorId: tutorSelecionado.id,
+            tutorNome: tutorSelecionado.nome,
+            petId: petSelecionado.id,
+            petNome: petSelecionado.nome,
+            veterinarioId: usuario.id,
+            veterinarioNome: usuario.nome,
+            dataConsulta,
+            temperatura,
+            peso,
+            tratamento,
+            observacoes,
+        };
+
+        await addClinicalRecord(KEYS.PRONTUARIOS, novoProntuario);
+
+        setMensagem("Prontuário salvo com sucesso.");
+
+        setTutorSelecionado(null);
+        setPetsDoTutor([]);
+        setPetSelecionado(null);
+        setDataConsulta("");
+        setTemperatura("");
+        setPeso("");
+        setTratamento("");
+        setObservacoes("");
+    }
 
     return {
         usuario,

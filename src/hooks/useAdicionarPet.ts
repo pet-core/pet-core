@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Usuario, Pet } from "../types/models";
+import { getUsuarioLogado } from "../services/authStorage";
+import { createPet } from "../services/petService";
 
 export function useAdicionarPet() {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -28,8 +29,8 @@ export function useAdicionarPet() {
         }, []);
 
     async function buscarUsuario() {
-            const dados = await AsyncStorage.getItem("USUARIO_LOGADO");
-            if (dados !== null) setUsuario(JSON.parse(dados));
+            const usuario = await getUsuarioLogado();
+            if (usuario !== null) setUsuario(usuario);
         }
 
     function mostrarMensagem(tipo: string, texto: string) {
@@ -46,41 +47,33 @@ export function useAdicionarPet() {
         }
 
     async function salvarPet() {
-            if (!nome || nome.trim() === "") {
-                mostrarMensagem("erro", "Informe o nome do pet.");
-                return;
-            }
-    
-            if (!usuario) {
-                mostrarMensagem("erro", "Usuário não encontrado.");
-                return;
-            }
-    
-            let pets: Pet[] = [];
-    
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            if (petsStorage !== null) {
-                pets = JSON.parse(petsStorage);
-            }
-    
-            const novoPet: Pet = {
-                id: `PET${Date.now()}`,
-                tutorId: usuario.id,
-                nome,
-                nascimento,
-                raca,
-                especie,
-                porte,
-                pelagem,
-                sexo,
-                obitoInformado: false,
-                comedouroStatus: "vazio",
-            };
-    
-            pets.push(novoPet);
-            await AsyncStorage.setItem("PETS", JSON.stringify(pets));
-            mostrarMensagem("sucesso", "Pet cadastrado com sucesso.");
+        if (!nome || nome.trim() === "") {
+            mostrarMensagem("erro", "Informe o nome do pet.");
+            return;
         }
+
+        if (!usuario) {
+            mostrarMensagem("erro", "Usuário não encontrado.");
+            return;
+        }
+
+        const novoPet: Pet = {
+            id: `PET${Date.now()}`,
+            tutorId: usuario.id,
+            nome,
+            nascimento,
+            raca,
+            especie,
+            porte,
+            pelagem,
+            sexo,
+            obitoInformado: false,
+            comedouroStatus: "vazio",
+        };
+
+        await createPet(novoPet);
+        mostrarMensagem("sucesso", "Pet cadastrado com sucesso.");
+    }
 
     return {
         usuario,

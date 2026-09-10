@@ -1,7 +1,7 @@
 
 import { Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppNavigation } from "../types";
+import { encerrarSessao } from "../services/authStorage";
 
 export function useTutorMenu() {
     const navigation = useAppNavigation();
@@ -18,7 +18,7 @@ export function useTutorMenu() {
         }
 
     async function sair() {
-            await AsyncStorage.removeItem("USUARIO_LOGADO");
+            await encerrarSessao();
             navigation.replace("Login");
         }
 

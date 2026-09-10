@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getTutores } from "../services/userService";
+import { getPetsByTutor } from "../services/petService";
+import { addClinicalRecord } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 import type { Usuario, Pet, Protocolo, RegistroClinico } from "../types/models";
 
 export function useProtocolos() {
@@ -28,22 +32,19 @@ export function useProtocolos() {
         }, []);
 
     async function buscarDados() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-    
-            if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
-    
-            if (usuariosStorage !== null) {
-                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
-                setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
-            }
+        const user = await getUsuarioLogado();
+        const tutoresDisponiveis = await getTutores();
+
+        if (user !== null) {
+            setUsuario(user);
         }
 
+        setTutores(tutoresDisponiveis);
+    }
+
     async function buscarPetsDoTutor(tutorId: string) {
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
-            setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
-        }
+        setPetsDoTutor(await getPetsByTutor(tutorId));
+    }
 
     function abrirFormulario(protocolo: Protocolo) {
             setProtocoloSelecionado(protocolo);
@@ -69,38 +70,38 @@ export function useProtocolos() {
         }
 
     async function enviarProtocolo() {
-            if (!protocoloSelecionado || !tutorSelecionado || !petSelecionado) {
-                setMensagem("Selecione tutor e pet.");
-                return;
-            }
-    
-            const storage = await AsyncStorage.getItem("PROTOCOLOS_ENVIADOS");
-            let enviados: RegistroClinico[] = storage ? JSON.parse(storage) : [];
-    
-            const novoProtocolo: RegistroClinico = {
-                id: `${Date.now()}`,
-                tutorId: tutorSelecionado.id,
-                tutorNome: tutorSelecionado.nome,
-                petId: petSelecionado.id,
-                petNome: petSelecionado.nome,
-                veterinarioId: usuario!.id,
-                veterinarioNome: usuario!.nome,
-                titulo: protocoloSelecionado!.titulo,
-                texto: protocoloSelecionado!.texto,
-                dataEnvio: new Date().toLocaleDateString("pt-BR"),
-            };
-    
-            enviados.push(novoProtocolo);
-    
-            await AsyncStorage.setItem("PROTOCOLOS_ENVIADOS", JSON.stringify(enviados));
-    
-            setMensagem("Protocolo enviado para o tutor.");
-            setMostrarFormulario(false);
-            setProtocoloSelecionado(null);
-            setTutorSelecionado(null);
-            setPetSelecionado(null);
-            setPetsDoTutor([]);
+        if (!protocoloSelecionado || !tutorSelecionado || !petSelecionado) {
+            setMensagem("Selecione tutor e pet.");
+            return;
         }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const novoProtocolo: RegistroClinico = {
+            id: `${Date.now()}`,
+            tutorId: tutorSelecionado.id,
+            tutorNome: tutorSelecionado.nome,
+            petId: petSelecionado.id,
+            petNome: petSelecionado.nome,
+            veterinarioId: usuario.id,
+            veterinarioNome: usuario.nome,
+            titulo: protocoloSelecionado.titulo,
+            texto: protocoloSelecionado.texto,
+            dataEnvio: new Date().toLocaleDateString("pt-BR"),
+        };
+
+        await addClinicalRecord(KEYS.PROTOCOLOS_ENVIADOS, novoProtocolo);
+
+        setMensagem("Protocolo enviado para o tutor.");
+        setMostrarFormulario(false);
+        setProtocoloSelecionado(null);
+        setTutorSelecionado(null);
+        setPetSelecionado(null);
+        setPetsDoTutor([]);
+    }
 
     return {
         usuario,

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Usuario, Clinica } from "../types/models";
+import { emailJaCadastrado, salvarUsuario } from "../services/authStorage";
 
 export function useCadastro() {
     const [nome, setNome] = useState("");
@@ -87,54 +87,47 @@ export function useCadastro() {
         }
 
     async function cadastrar() {
-            if (!nome || nome.trim() === "") {
-                mostrarMensagem("erro", "Informe o nome");
-                return;
-            }
-    
-            if (!email || email.trim() === "") {
-                mostrarMensagem("erro", "Informe o e-mail");
-                return;
-            }
-    
-            if (!senha || senha.trim() === "") {
-                mostrarMensagem("erro", "Informe a senha");
-                return;
-            }
-    
-            let usuarios: Usuario[] = [];
-            const dados = await AsyncStorage.getItem("USUARIOS");
-            if (dados !== null) {
-                usuarios = JSON.parse(dados);
-            }
-    
-            const existeEmail = usuarios.find((item) => item.email === email);
-            if (existeEmail) {
-                mostrarMensagem("erro", "Este e-mail já está cadastrado");
-                return;
-            }
-    
-            const novoUsuario: Usuario = {
-                id: isVeterinario ? `VET${Date.now()}` : `${Date.now()}`,
-                nome: nome.trim(),
-                nascimento,
-                telefone,
-                genero,
-                email,
-                senha,
-                tipoPerfil: isVeterinario ? "veterinario" : "tutor",
-                especializacao,
-                clinica: clinica || nomeClinica,
-                cnpj,
-                nomeClinica: nomeClinica || clinica,
-                cep,
-                complemento,
-            };
-    
-            usuarios.push(novoUsuario);
-            await AsyncStorage.setItem("USUARIOS", JSON.stringify(usuarios));
-            mostrarMensagem("sucesso", "Cadastro realizado com sucesso!");
+        if (!nome || nome.trim() === "") {
+            mostrarMensagem("erro", "Informe o nome");
+            return;
         }
+
+        if (!email || email.trim() === "") {
+            mostrarMensagem("erro", "Informe o e-mail");
+            return;
+        }
+
+        if (!senha || senha.trim() === "") {
+            mostrarMensagem("erro", "Informe a senha");
+            return;
+        }
+
+        const existeEmail = await emailJaCadastrado(email);
+        if (existeEmail) {
+            mostrarMensagem("erro", "Este e-mail já está cadastrado");
+            return;
+        }
+
+        const novoUsuario: Usuario = {
+            id: isVeterinario ? `VET${Date.now()}` : `${Date.now()}`,
+            nome: nome.trim(),
+            nascimento,
+            telefone,
+            genero,
+            email,
+            senha,
+            tipoPerfil: isVeterinario ? "veterinario" : "tutor",
+            especializacao,
+            clinica: clinica || nomeClinica,
+            cnpj,
+            nomeClinica: nomeClinica || clinica,
+            cep,
+            complemento,
+        };
+
+        await salvarUsuario(novoUsuario);
+        mostrarMensagem("sucesso", "Cadastro realizado com sucesso!");
+    }
 
     return {
         nome,

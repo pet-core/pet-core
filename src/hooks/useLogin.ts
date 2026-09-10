@@ -1,7 +1,6 @@
 import { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppNavigation } from "../types";
-import type { Usuario } from "../types/models";
+import { findUsuarioByCredentials, salvarSessao } from "../services/authStorage";
 
 export function useLogin() {
     const navigation = useAppNavigation();
@@ -29,18 +28,14 @@ export function useLogin() {
                 return;
             }
     
-            const dados = await AsyncStorage.getItem("USUARIOS");
-            const usuarios: Usuario[] = dados ? JSON.parse(dados) : [];
-            const usuarioEncontrado = usuarios.find((item) => {
-                return item.email === email && item.senha === senha;
-            });
+            const usuarioEncontrado = await findUsuarioByCredentials(email, senha);
     
             if (!usuarioEncontrado) {
                 mostrarMensagem("erro", "E-mail ou senha inválidos");
                 return;
             }
     
-            await AsyncStorage.setItem("USUARIO_LOGADO", JSON.stringify(usuarioEncontrado));
+            await salvarSessao(usuarioEncontrado);
     
             if (usuarioEncontrado.tipoPerfil === "veterinario") {
                 navigation.replace("VetHome");

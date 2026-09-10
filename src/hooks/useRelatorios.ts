@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getTutores } from "../services/userService";
+import { getPetsByTutor } from "../services/petService";
+import { getClinicalRecords, addClinicalRecord } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useRelatorios() {
@@ -26,29 +30,24 @@ export function useRelatorios() {
         }, []);
 
     async function buscarDados() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-    
-            if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
-    
-            if (usuariosStorage !== null) {
-                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
-                setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
-            }
+        const user = await getUsuarioLogado();
+        const tutoresDisponiveis = await getTutores();
+
+        if (user !== null) {
+            setUsuario(user);
         }
+
+        setTutores(tutoresDisponiveis);
+    }
 
     async function buscarPetsDoTutor(tutorId: string) {
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
-            setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
-        }
+        setPetsDoTutor(await getPetsByTutor(tutorId));
+    }
 
     async function buscarProntuariosDoPet(petId: string) {
-            const storage = await AsyncStorage.getItem("PRONTUARIOS");
-            const todos: RegistroClinico[] = storage ? JSON.parse(storage) : [];
-            const filtrados = todos.filter((item) => item.petId === petId);
-            setProntuariosPet(filtrados);
-        }
+        const prontuarios = await getClinicalRecords(KEYS.PRONTUARIOS);
+        setProntuariosPet(prontuarios.filter((item) => item.petId === petId));
+    }
 
     function selecionarTutor(item: Usuario) {
             setTutorSelecionado(item);
@@ -67,35 +66,37 @@ export function useRelatorios() {
         }
 
     async function enviarRelatorio() {
-            if (!tutorSelecionado || !petSelecionado) {
-                setMensagem("Selecione tutor e pet.");
-                return;
-            }
-    
-            if (prontuariosPet.length === 0) {
-                setMensagem("Este pet ainda não possui prontuários.");
-                return;
-            }
-    
-            const storage = await AsyncStorage.getItem("HISTORICOS_ENVIADOS");
-            let historicos = storage ? JSON.parse(storage) : [];
-    
-            const novoHistorico = {
-                id: `${Date.now()}`,
-                tutorId: tutorSelecionado.id,
-                tutorNome: tutorSelecionado.nome,
-                petId: petSelecionado.id,
-                petNome: petSelecionado.nome,
-                veterinarioId: usuario!.id,
-                veterinarioNome: usuario!.nome,
-                dataEmissao: new Date().toLocaleDateString("pt-BR"),
-                arquivoHistorico: `historico_clinico_${petSelecionado.nome.toLowerCase().replaceAll(" ", "_")}.pdf`,
-                prontuarios: prontuariosPet,
-            };
-            historicos.push(novoHistorico);
-            await AsyncStorage.setItem("HISTORICOS_ENVIADOS", JSON.stringify(historicos));
-            setMensagem("Histórico enviado para o tutor.");
+        if (!tutorSelecionado || !petSelecionado) {
+            setMensagem("Selecione tutor e pet.");
+            return;
         }
+
+        if (prontuariosPet.length === 0) {
+            setMensagem("Este pet ainda não possui prontuários.");
+            return;
+        }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const novoHistorico: RegistroClinico = {
+            id: `${Date.now()}`,
+            tutorId: tutorSelecionado.id,
+            tutorNome: tutorSelecionado.nome,
+            petId: petSelecionado.id,
+            petNome: petSelecionado.nome,
+            veterinarioId: usuario.id,
+            veterinarioNome: usuario.nome,
+            dataEmissao: new Date().toLocaleDateString("pt-BR"),
+            arquivoHistorico: `historico_clinico_${petSelecionado.nome.toLowerCase().replaceAll(" ", "_")}.pdf`,
+            prontuarios: JSON.stringify(prontuariosPet),
+        };
+
+        await addClinicalRecord(KEYS.HISTORICOS_ENVIADOS, novoHistorico);
+        setMensagem("Histórico enviado para o tutor.");
+    }
 
     return {
         usuario,

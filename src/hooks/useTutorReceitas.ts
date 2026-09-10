@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { Usuario, RegistroClinico } from "../types/models";
+import type { RegistroClinico } from "../types/models";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getClinicalRecords } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 
 export function useTutorReceitas() {
     const [receitas, setReceitas] = useState<RegistroClinico[]>([]);
@@ -12,15 +14,13 @@ export function useTutorReceitas() {
         }, []);
 
     async function buscarReceitas() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const receitasStorage = await AsyncStorage.getItem("RECEITAS_ENVIADAS");
-    
-            if (usuarioStorage !== null) {
-                const usuario: Usuario = JSON.parse(usuarioStorage);
-                const listaReceitas: RegistroClinico[] = receitasStorage ? JSON.parse(receitasStorage) : [];
-                setReceitas(listaReceitas.filter((item) => item.tutorId === usuario.id));
-            }
+        const usuario = await getUsuarioLogado();
+
+        if (usuario !== null) {
+            const lista = await getClinicalRecords(KEYS.RECEITAS_ENVIADAS);
+            setReceitas(lista.filter((item) => item.tutorId === usuario.id));
         }
+    }
 
     function abrirCard(id: string) {
             setCardAberto(cardAberto === id ? null : id);

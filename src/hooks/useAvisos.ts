@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { Usuario, RegistroClinico } from "../types/models";
+import type { RegistroClinico } from "../types/models";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getClinicalRecords } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 
 export function useAvisos() {
     const [avisos, setAvisos] = useState<RegistroClinico[]>([]);
@@ -12,15 +14,13 @@ export function useAvisos() {
         }, []);
 
     async function buscarAvisos() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const protocolosStorage = await AsyncStorage.getItem("PROTOCOLOS_ENVIADOS");
-    
-            if (usuarioStorage !== null) {
-                const usuario: Usuario = JSON.parse(usuarioStorage);
-                const lista: RegistroClinico[] = protocolosStorage ? JSON.parse(protocolosStorage) : [];
-                setAvisos(lista.filter((item) => item.tutorId === usuario.id));
-            }
+        const usuario = await getUsuarioLogado();
+
+        if (usuario !== null) {
+            const lista = await getClinicalRecords(KEYS.PROTOCOLOS_ENVIADOS);
+            setAvisos(lista.filter((item) => item.tutorId === usuario.id));
         }
+    }
 
     function abrirCard(id: string) {
             setCardAberto(cardAberto === id ? null : id);

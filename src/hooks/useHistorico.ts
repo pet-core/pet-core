@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getPetsByTutor } from "../services/petService";
+import { getClinicalRecords, addClinicalRecord } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useHistorico() {
@@ -22,21 +25,16 @@ export function useHistorico() {
         }, []);
 
     async function buscarDados() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            const historicosStorage = await AsyncStorage.getItem("HISTORICOS_ENVIADOS");
-    
-            if (usuarioStorage !== null) {
-                const user: Usuario = JSON.parse(usuarioStorage);
-                setUsuario(user);
-    
-                const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
-                setPets(todosPets.filter((pet) => pet.tutorId === user.id));
-    
-                const listaHistoricos: RegistroClinico[] = historicosStorage ? JSON.parse(historicosStorage) : [];
-                setHistoricos(listaHistoricos.filter((item) => item.tutorId === user.id));
-            }
+        const user = await getUsuarioLogado();
+
+        if (user !== null) {
+            setUsuario(user);
+            setPets(await getPetsByTutor(user.id));
+
+            const listaHistoricos = await getClinicalRecords(KEYS.HISTORICOS_ENVIADOS);
+            setHistoricos(listaHistoricos.filter((item) => item.tutorId === user.id));
         }
+    }
 
     function selecionarPet(item: Pet) {
             setPetSelecionado(item);
@@ -45,28 +43,29 @@ export function useHistorico() {
         }
 
     async function solicitarHistorico() {
-            if (!petSelecionado) {
-                setMensagem("Selecione um pet para solicitar o histórico.");
-                return;
-            }
-    
-            const storage = await AsyncStorage.getItem("SOLICITACOES_HISTORICO");
-            let solicitacoes: RegistroClinico[] = storage ? JSON.parse(storage) : [];
-    
-            const novaSolicitacao: RegistroClinico = {
-                id: `${Date.now()}`,
-                tutorId: usuario!.id,
-                tutorNome: usuario!.nome,
-                petId: petSelecionado.id,
-                petNome: petSelecionado.nome,
-                status: "Solicitado",
-                dataSolicitacao: new Date().toLocaleDateString("pt-BR"),
-            };
-    
-            solicitacoes.push(novaSolicitacao);
-            await AsyncStorage.setItem("SOLICITACOES_HISTORICO", JSON.stringify(solicitacoes));
-            setMensagem("Solicitação de histórico enviada com sucesso.");
+        if (!petSelecionado) {
+            setMensagem("Selecione um pet para solicitar o histórico.");
+            return;
         }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const novaSolicitacao: RegistroClinico = {
+            id: `${Date.now()}`,
+            tutorId: usuario.id,
+            tutorNome: usuario.nome,
+            petId: petSelecionado.id,
+            petNome: petSelecionado.nome,
+            status: "Solicitado",
+            dataSolicitacao: new Date().toLocaleDateString("pt-BR"),
+        };
+
+        await addClinicalRecord(KEYS.SOLICITACOES_HISTORICO, novaSolicitacao);
+        setMensagem("Solicitação de histórico enviada com sucesso.");
+    }
 
     function abrirCard(id: string) {
             setCardAberto(cardAberto === id ? null : id);

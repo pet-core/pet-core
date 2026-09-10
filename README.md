@@ -23,10 +23,8 @@ O projeto atende aos seguintes requisitos propostos:
 - Estrutura com múltiplas rotas navegáveis, organizadas em fluxo lógico de uso.
 - Arquitetura em camadas: Views (`src/screens`) → Hooks de controle (`src/hooks`) → Serviços de dados (`src/services`).
 
-### Protótipo visual funcional
-- Interface completa com telas estruturadas de forma coerente.
-- Layout funcional simulando a experiência real de uso do aplicativo.
-- Utilização de dados mockados para demonstração das funcionalidades.
+### Estado atual da Sprint 3
+A base da Sprint 3 está sendo construída de forma incremental. O primeiro passo é a separação de responsabilidades entre telas, hooks e serviços de dados. A camada de persistência local existente permanece apenas como etapa intermediária até a entrada da API HTTP do backend.
 
 ### Formulário com manipulação de estado
 - Controle de campos com **useState**.
@@ -96,9 +94,13 @@ src/
     SplashScreen.tsx
   hooks/                     -> lógica de cada tela (state, handlers, side-effects), em .ts
   services/
-    storage.ts                -> acesso centralizado ao AsyncStorage (tipado)
+    storage.ts                -> acesso de baixo nível ao armazenamento local
+    authStorage.ts            -> operações de autenticação/sessão da etapa local
+    userService.ts            -> consultas de usuários/tutores
+    petService.ts             -> operações de pets
+    clinicalRecordService.ts  -> operações de registros clínicos
   data/
-    mockData.ts                -> dados mockados de usuários e pets (tipados)
+    mockData.ts                -> dados iniciais da etapa local (serão removidos na integração com API)
   types/
     models.ts                  -> tipos de domínio (Usuario, Pet, Clinica, Protocolo...)
     navigation.ts               -> RootStackParamList (tipagem das rotas)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Usuario } from "../types/models";
+import { getUsuarioLogado } from "../services/authStorage";
 
 export function useVetHome() {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -10,9 +10,9 @@ export function useVetHome() {
         }, []);
 
     async function buscarUsuario() {
-            const dados = await AsyncStorage.getItem("USUARIO_LOGADO");
-            if (dados !== null) {
-                setUsuario(JSON.parse(dados));
+            const usuario = await getUsuarioLogado();
+            if (usuario !== null) {
+                setUsuario(usuario);
             }
         }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado, atualizarUsuario } from "../services/authStorage";
 import type { Usuario, Clinica } from "../types/models";
 
 export function useVetAlterarDados() {
@@ -28,18 +28,18 @@ export function useVetAlterarDados() {
         }, []);
 
     async function buscarUsuario() {
-            const dados = await AsyncStorage.getItem("USUARIO_LOGADO");
-            if (dados !== null) {
-                const user = JSON.parse(dados);
-                setUsuario(user);
-                setNome(user.nome || "");
-                setEspecializacao(user.especializacao || "");
-                setClinica(user.clinica || user.nomeClinica || "");
-                setCnpj(user.cnpj || "");
-                setCep(user.cep || "");
-                setComplemento(user.complemento || "");
-            }
+        const user = await getUsuarioLogado();
+
+        if (user !== null) {
+            setUsuario(user);
+            setNome(user.nome || "");
+            setEspecializacao(user.especializacao || "");
+            setClinica(user.clinica || user.nomeClinica || "");
+            setCnpj(user.cnpj || "");
+            setCep(user.cep || "");
+            setComplemento(user.complemento || "");
         }
+    }
 
     function selecionarClinica(item: Clinica) {
             setClinica(item.nome);
@@ -50,42 +50,39 @@ export function useVetAlterarDados() {
         }
 
     async function salvar() {
-            if (!nome || nome.trim() === "") {
-                setMensagem("Informe o nome.");
-                return;
-            }
-            if (!especializacao || especializacao.trim() === "") {
-                setMensagem("Informe a especialização.");
-                return;
-            }
-            if (!clinica || clinica.trim() === "") {
-                setMensagem("Informe a clínica.");
-                return;
-            }
-    
-            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-            let usuarios: Usuario[] = usuariosStorage ? JSON.parse(usuariosStorage) : [];
-    
-            const usuarioAtualizado: Usuario = {
-                ...usuario!,
-                nome,
-                especializacao,
-                clinica,
-                nomeClinica: clinica,
-                cnpj,
-                cep,
-                complemento,
-            };
-    
-            usuarios = usuarios.map((item) => {
-                if (item.id === usuario?.id) return usuarioAtualizado;
-                return item;
-            });
-    
-            await AsyncStorage.setItem("USUARIOS", JSON.stringify(usuarios));
-            await AsyncStorage.setItem("USUARIO_LOGADO", JSON.stringify(usuarioAtualizado));
-            setMensagem("Dados atualizados com sucesso.");
+        if (!nome || nome.trim() === "") {
+            setMensagem("Informe o nome.");
+            return;
         }
+        if (!especializacao || especializacao.trim() === "") {
+            setMensagem("Informe a especialização.");
+            return;
+        }
+        if (!clinica || clinica.trim() === "") {
+            setMensagem("Informe a clínica.");
+            return;
+        }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const usuarioAtualizado: Usuario = {
+            ...usuario,
+            nome,
+            especializacao,
+            clinica,
+            nomeClinica: clinica,
+            cnpj,
+            cep,
+            complemento,
+        };
+
+        await atualizarUsuario(usuarioAtualizado);
+        setUsuario(usuarioAtualizado);
+        setMensagem("Dados atualizados com sucesso.");
+    }
 
     return {
         usuario,

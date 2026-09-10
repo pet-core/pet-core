@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { Usuario, Pet } from "../types/models";
+import type { Pet } from "../types/models";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getPetsByTutor, updatePet } from "../services/petService";
 
 export function useComedouro() {
     const [pets, setPets] = useState<Pet[]>([]);
@@ -14,15 +15,12 @@ export function useComedouro() {
         }, []);
 
     async function buscarPets() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const petsStorage = await AsyncStorage.getItem("PETS");
-    
-            if (usuarioStorage !== null && petsStorage !== null) {
-                const usuario: Usuario = JSON.parse(usuarioStorage);
-                const todosPets: Pet[] = JSON.parse(petsStorage);
-                setPets(todosPets.filter((pet) => pet.tutorId === usuario.id));
-            }
+        const usuario = await getUsuarioLogado();
+
+        if (usuario !== null) {
+            setPets(await getPetsByTutor(usuario.id));
         }
+    }
 
     function abrirPet(id: string) {
             setPetAberto(petAberto === id ? null : id);
@@ -30,27 +28,23 @@ export function useComedouro() {
         }
 
     async function encherComedouro(petId: string) {
-            const petAtual = pets.find((pet) => pet.id === petId);
-    
-            if (petAtual && petAtual.comedouroStatus === "cheio") {
-                setMensagem("O comedouro já está cheio.");
-                return;
-            }
-    
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            let todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
-    
-            todosPets = todosPets.map((pet) => {
-                if (pet.id === petId) {
-                return { ...pet, comedouroStatus: "cheio" };
-                }
-                return pet;
-            });
-    
-            await AsyncStorage.setItem("PETS", JSON.stringify(todosPets));
-            setMensagem("Comedouro preenchido com sucesso.");
-            buscarPets();
+        const petAtual = pets.find((pet) => pet.id === petId);
+
+        if (petAtual && petAtual.comedouroStatus === "cheio") {
+            setMensagem("O comedouro já está cheio.");
+            return;
         }
+
+        if (petAtual) {
+            await updatePet({
+                ...petAtual,
+                comedouroStatus: "cheio",
+            });
+        }
+
+        setMensagem("Comedouro preenchido com sucesso.");
+        await buscarPets();
+    }
 
     return {
         pets,

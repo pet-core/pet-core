@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { Usuario, RegistroClinico } from "../types/models";
+import type { RegistroClinico } from "../types/models";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getClinicalRecords } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 
 export function useTutorExames() {
     const [exames, setExames] = useState<RegistroClinico[]>([]);
@@ -12,15 +14,13 @@ export function useTutorExames() {
         }, []);
 
     async function buscarExames() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const examesStorage = await AsyncStorage.getItem("EXAMES_ENVIADOS");
-    
-            if (usuarioStorage !== null) {
-                const user: Usuario = JSON.parse(usuarioStorage);
-                const listaExames: RegistroClinico[] = examesStorage ? JSON.parse(examesStorage) : [];
-                setExames(listaExames.filter((item) => item.tutorId === user.id));
-            }
+        const usuario = await getUsuarioLogado();
+
+        if (usuario !== null) {
+            const lista = await getClinicalRecords(KEYS.EXAMES_ENVIADOS);
+            setExames(lista.filter((item) => item.tutorId === usuario.id));
         }
+    }
 
     function abrirCard(id: string) {
             setCardAberto(cardAberto === id ? null : id);

@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getTutores } from "../services/userService";
+import { getPetsByTutor } from "../services/petService";
+import { addClinicalRecord } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useVetExames() {
@@ -30,22 +34,19 @@ export function useVetExames() {
         }, []);
 
     async function buscarDados() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-    
-            if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
-    
-            if (usuariosStorage !== null) {
-                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
-                setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
-            }
+        const user = await getUsuarioLogado();
+        const tutoresDisponiveis = await getTutores();
+
+        if (user !== null) {
+            setUsuario(user);
         }
 
+        setTutores(tutoresDisponiveis);
+    }
+
     async function buscarPetsDoTutor(tutorId: string) {
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
-            setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
-        }
+        setPetsDoTutor(await getPetsByTutor(tutorId));
+    }
 
     function selecionarTutor(item: Usuario) {
             setTutorSelecionado(item);
@@ -84,38 +85,38 @@ export function useVetExames() {
         }
 
     async function enviarExame() {
-            if (!tutorSelecionado || !petSelecionado || !exameSelecionado || !arquivoSolicitacao) {
-                setMensagem("Preencha todos os campos.");
-                return;
-            }
-    
-            const storage = await AsyncStorage.getItem("EXAMES_ENVIADOS");
-            let exames: RegistroClinico[] = storage ? JSON.parse(storage) : [];
-    
-            const novoExame: RegistroClinico = {
-                id: `${Date.now()}`,
-                tutorId: tutorSelecionado.id,
-                tutorNome: tutorSelecionado.nome,
-                petId: petSelecionado.id,
-                petNome: petSelecionado.nome,
-                veterinarioId: usuario!.id,
-                veterinarioNome: usuario!.nome,
-                tipoExame: exameSelecionado,
-                arquivoSolicitacao,
-                dataEnvio: new Date().toLocaleDateString("pt-BR"),
-            };
-    
-            exames.push(novoExame);
-    
-            await AsyncStorage.setItem("EXAMES_ENVIADOS", JSON.stringify(exames));
-    
-            setMensagem("Solicitação de exame enviada para o tutor.");
-            setTutorSelecionado(null);
-            setPetsDoTutor([]);
-            setPetSelecionado(null);
-            setExameSelecionado("");
-            setArquivoSolicitacao("");
+        if (!tutorSelecionado || !petSelecionado || !exameSelecionado || !arquivoSolicitacao) {
+            setMensagem("Preencha todos os campos.");
+            return;
         }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const novoExame: RegistroClinico = {
+            id: `${Date.now()}`,
+            tutorId: tutorSelecionado.id,
+            tutorNome: tutorSelecionado.nome,
+            petId: petSelecionado.id,
+            petNome: petSelecionado.nome,
+            veterinarioId: usuario.id,
+            veterinarioNome: usuario.nome,
+            tipoExame: exameSelecionado,
+            arquivoSolicitacao,
+            dataEnvio: new Date().toLocaleDateString("pt-BR"),
+        };
+
+        await addClinicalRecord(KEYS.EXAMES_ENVIADOS, novoExame);
+
+        setMensagem("Solicitação de exame enviada para o tutor.");
+        setTutorSelecionado(null);
+        setPetsDoTutor([]);
+        setPetSelecionado(null);
+        setExameSelecionado("");
+        setArquivoSolicitacao("");
+    }
 
     return {
         usuario,

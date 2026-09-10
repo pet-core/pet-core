@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsuarioLogado } from "../services/authStorage";
+import { getTutores } from "../services/userService";
+import { getPetsByTutor } from "../services/petService";
+import { addClinicalRecord } from "../services/clinicalRecordService";
+import { KEYS } from "../services/storage";
 import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useVetReceitas() {
@@ -26,22 +30,19 @@ export function useVetReceitas() {
         }, []);
 
     async function buscarDados() {
-            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
-            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-    
-            if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
-    
-            if (usuariosStorage !== null) {
-                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
-                setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
-            }
+        const user = await getUsuarioLogado();
+        const tutoresDisponiveis = await getTutores();
+
+        if (user !== null) {
+            setUsuario(user);
         }
 
+        setTutores(tutoresDisponiveis);
+    }
+
     async function buscarPetsDoTutor(tutorId: string) {
-            const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
-            setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
-        }
+        setPetsDoTutor(await getPetsByTutor(tutorId));
+    }
 
     function selecionarTutor(item: Usuario) {
             setTutorSelecionado(item);
@@ -71,36 +72,36 @@ export function useVetReceitas() {
         }
 
     async function enviarReceita() {
-            if (!tutorSelecionado || !petSelecionado || !arquivoReceita) {
-                setMensagem("Preencha todos os campos.");
-                return;
-            }
-    
-            const storage = await AsyncStorage.getItem("RECEITAS_ENVIADAS");
-            let receitas: RegistroClinico[] = storage ? JSON.parse(storage) : [];
-    
-            const novaReceita: RegistroClinico = {
-                id: `${Date.now()}`,
-                tutorId: tutorSelecionado.id,
-                tutorNome: tutorSelecionado.nome,
-                petId: petSelecionado.id,
-                petNome: petSelecionado.nome,
-                veterinarioId: usuario!.id,
-                veterinarioNome: usuario!.nome,
-                arquivoReceita,
-                dataEnvio: new Date().toLocaleDateString("pt-BR"),
-            };
-    
-            receitas.push(novaReceita);
-    
-            await AsyncStorage.setItem("RECEITAS_ENVIADAS", JSON.stringify(receitas));
-    
-            setMensagem("Receita enviada para o tutor.");
-            setTutorSelecionado(null);
-            setPetsDoTutor([]);
-            setPetSelecionado(null);
-            setArquivoReceita("");
+        if (!tutorSelecionado || !petSelecionado || !arquivoReceita) {
+            setMensagem("Preencha todos os campos.");
+            return;
         }
+
+        if (!usuario) {
+            setMensagem("Usuário não encontrado.");
+            return;
+        }
+
+        const novaReceita: RegistroClinico = {
+            id: `${Date.now()}`,
+            tutorId: tutorSelecionado.id,
+            tutorNome: tutorSelecionado.nome,
+            petId: petSelecionado.id,
+            petNome: petSelecionado.nome,
+            veterinarioId: usuario.id,
+            veterinarioNome: usuario.nome,
+            arquivoReceita,
+            dataEnvio: new Date().toLocaleDateString("pt-BR"),
+        };
+
+        await addClinicalRecord(KEYS.RECEITAS_ENVIADAS, novaReceita);
+
+        setMensagem("Receita enviada para o tutor.");
+        setTutorSelecionado(null);
+        setPetsDoTutor([]);
+        setPetSelecionado(null);
+        setArquivoReceita("");
+    }
 
     return {
         usuario,

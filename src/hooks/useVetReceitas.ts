@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useVetReceitas() {
-    const navigation = useNavigation();
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-    const [usuario, setUsuario] = useState(null);
+    const [tutores, setTutores] = useState<Usuario[]>([]);
 
-    const [tutores, setTutores] = useState([]);
+    const [tutorSelecionado, setTutorSelecionado] = useState<Usuario | null>(null);
 
-    const [tutorSelecionado, setTutorSelecionado] = useState(null);
+    const [petsDoTutor, setPetsDoTutor] = useState<Pet[]>([]);
 
-    const [petsDoTutor, setPetsDoTutor] = useState([]);
-
-    const [petSelecionado, setPetSelecionado] = useState(null);
+    const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
 
     const [arquivoReceita, setArquivoReceita] = useState("");
 
@@ -34,18 +32,18 @@ export function useVetReceitas() {
             if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
     
             if (usuariosStorage !== null) {
-                const usuarios = JSON.parse(usuariosStorage);
+                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
                 setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
             }
         }
 
-    async function buscarPetsDoTutor(tutorId) {
+    async function buscarPetsDoTutor(tutorId: string) {
             const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets = petsStorage ? JSON.parse(petsStorage) : [];
+            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
             setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
         }
 
-    function selecionarTutor(item) {
+    function selecionarTutor(item: Usuario) {
             setTutorSelecionado(item);
             setPetSelecionado(null);
             setArquivoReceita("");
@@ -54,7 +52,7 @@ export function useVetReceitas() {
             buscarPetsDoTutor(item.id);
         }
 
-    function selecionarPet(item) {
+    function selecionarPet(item: Pet) {
             setPetSelecionado(item);
             setArquivoReceita("");
             setMensagem("");
@@ -79,16 +77,16 @@ export function useVetReceitas() {
             }
     
             const storage = await AsyncStorage.getItem("RECEITAS_ENVIADAS");
-            let receitas = storage ? JSON.parse(storage) : [];
+            let receitas: RegistroClinico[] = storage ? JSON.parse(storage) : [];
     
-            const novaReceita = {
+            const novaReceita: RegistroClinico = {
                 id: `${Date.now()}`,
                 tutorId: tutorSelecionado.id,
                 tutorNome: tutorSelecionado.nome,
                 petId: petSelecionado.id,
                 petNome: petSelecionado.nome,
-                veterinarioId: usuario.id,
-                veterinarioNome: usuario.nome,
+                veterinarioId: usuario!.id,
+                veterinarioNome: usuario!.nome,
                 arquivoReceita,
                 dataEnvio: new Date().toLocaleDateString("pt-BR"),
             };

@@ -1,21 +1,19 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Pet, Protocolo, RegistroClinico } from "../types/models";
 
 export function useProtocolos() {
-    const navigation = useNavigation();
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-    const [usuario, setUsuario] = useState(null);
+    const [tutores, setTutores] = useState<Usuario[]>([]);
 
-    const [tutores, setTutores] = useState([]);
+    const [tutorSelecionado, setTutorSelecionado] = useState<Usuario | null>(null);
 
-    const [tutorSelecionado, setTutorSelecionado] = useState(null);
+    const [petsDoTutor, setPetsDoTutor] = useState<Pet[]>([]);
 
-    const [petsDoTutor, setPetsDoTutor] = useState([]);
+    const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
 
-    const [petSelecionado, setPetSelecionado] = useState(null);
-
-    const [protocoloSelecionado, setProtocoloSelecionado] = useState(null);
+    const [protocoloSelecionado, setProtocoloSelecionado] = useState<Protocolo | null>(null);
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
@@ -36,18 +34,18 @@ export function useProtocolos() {
             if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
     
             if (usuariosStorage !== null) {
-                const usuarios = JSON.parse(usuariosStorage);
+                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
                 setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
             }
         }
 
-    async function buscarPetsDoTutor(tutorId) {
+    async function buscarPetsDoTutor(tutorId: string) {
             const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets = petsStorage ? JSON.parse(petsStorage) : [];
+            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
             setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
         }
 
-    function abrirFormulario(protocolo) {
+    function abrirFormulario(protocolo: Protocolo) {
             setProtocoloSelecionado(protocolo);
             setMostrarFormulario(true);
             setTutorSelecionado(null);
@@ -56,7 +54,7 @@ export function useProtocolos() {
             setMensagem("");
         }
 
-    function selecionarTutor(item) {
+    function selecionarTutor(item: Usuario) {
             setTutorSelecionado(item);
             setPetSelecionado(null);
             setMensagem("");
@@ -64,7 +62,7 @@ export function useProtocolos() {
             buscarPetsDoTutor(item.id);
         }
 
-    function selecionarPet(item) {
+    function selecionarPet(item: Pet) {
             setPetSelecionado(item);
             setMensagem("");
             setModalPet(false);
@@ -77,18 +75,18 @@ export function useProtocolos() {
             }
     
             const storage = await AsyncStorage.getItem("PROTOCOLOS_ENVIADOS");
-            let enviados = storage ? JSON.parse(storage) : [];
+            let enviados: RegistroClinico[] = storage ? JSON.parse(storage) : [];
     
-            const novoProtocolo = {
+            const novoProtocolo: RegistroClinico = {
                 id: `${Date.now()}`,
                 tutorId: tutorSelecionado.id,
                 tutorNome: tutorSelecionado.nome,
                 petId: petSelecionado.id,
                 petNome: petSelecionado.nome,
-                veterinarioId: usuario.id,
-                veterinarioNome: usuario.nome,
-                titulo: protocoloSelecionado.titulo,
-                texto: protocoloSelecionado.texto,
+                veterinarioId: usuario!.id,
+                veterinarioNome: usuario!.nome,
+                titulo: protocoloSelecionado!.titulo,
+                texto: protocoloSelecionado!.texto,
                 dataEnvio: new Date().toLocaleDateString("pt-BR"),
             };
     

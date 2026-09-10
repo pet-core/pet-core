@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario } from "../types/models";
 
 export function useVetHome() {
-    const navigation = useNavigation();
-
-    const [usuario, setUsuario] = useState(null);
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
     useEffect(() => {
             buscarUsuario();

@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useProntuario() {
-    const navigation = useNavigation();
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-    const [usuario, setUsuario] = useState(null);
+    const [tutores, setTutores] = useState<Usuario[]>([]);
 
-    const [tutores, setTutores] = useState([]);
+    const [tutorSelecionado, setTutorSelecionado] = useState<Usuario | null>(null);
 
-    const [tutorSelecionado, setTutorSelecionado] = useState(null);
+    const [petsDoTutor, setPetsDoTutor] = useState<Pet[]>([]);
 
-    const [petsDoTutor, setPetsDoTutor] = useState([]);
-
-    const [petSelecionado, setPetSelecionado] = useState(null);
+    const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
 
     const [dataConsulta, setDataConsulta] = useState("");
 
@@ -42,18 +40,18 @@ export function useProntuario() {
             if (usuarioStorage !== null) setUsuario(JSON.parse(usuarioStorage));
     
             if (usuariosStorage !== null) {
-                const usuarios = JSON.parse(usuariosStorage);
+                const usuarios: Usuario[] = JSON.parse(usuariosStorage);
                 setTutores(usuarios.filter((item) => item.tipoPerfil === "tutor"));
             }
         }
 
-    async function buscarPetsDoTutor(tutorId) {
+    async function buscarPetsDoTutor(tutorId: string) {
             const petsStorage = await AsyncStorage.getItem("PETS");
-            const todosPets = petsStorage ? JSON.parse(petsStorage) : [];
+            const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
             setPetsDoTutor(todosPets.filter((pet) => pet.tutorId === tutorId));
         }
 
-    function selecionarTutor(item) {
+    function selecionarTutor(item: Usuario) {
             setTutorSelecionado(item);
             setPetSelecionado(null);
             setMensagem("");
@@ -61,13 +59,13 @@ export function useProntuario() {
             buscarPetsDoTutor(item.id);
         }
 
-    function selecionarPet(item) {
+    function selecionarPet(item: Pet) {
             setPetSelecionado(item);
             setMensagem("");
             setModalPet(false);
         }
 
-    function formatarData(texto) {
+    function formatarData(texto: string) {
             let numeros = texto.replace(/\D/g, "");
             if (numeros.length > 8) {
                 numeros = numeros.slice(0, 8);
@@ -88,16 +86,16 @@ export function useProntuario() {
             }
     
             const storage = await AsyncStorage.getItem("PRONTUARIOS");
-            let prontuarios = storage ? JSON.parse(storage) : [];
+            let prontuarios: RegistroClinico[] = storage ? JSON.parse(storage) : [];
     
-            const novoProntuario = {
+            const novoProntuario: RegistroClinico = {
                 id: `${Date.now()}`,
                 tutorId: tutorSelecionado.id,
                 tutorNome: tutorSelecionado.nome,
                 petId: petSelecionado.id,
                 petNome: petSelecionado.nome,
-                veterinarioId: usuario.id,
-                veterinarioNome: usuario.nome,
+                veterinarioId: usuario!.id,
+                veterinarioNome: usuario!.nome,
                 dataConsulta,
                 temperatura,
                 peso,

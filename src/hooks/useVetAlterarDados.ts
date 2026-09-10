@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Clinica } from "../types/models";
 
 export function useVetAlterarDados() {
-    const navigation = useNavigation();
-
-    const [usuario, setUsuario] = useState(null);
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
     const [nome, setNome] = useState("");
 
@@ -43,7 +41,7 @@ export function useVetAlterarDados() {
             }
         }
 
-    function selecionarClinica(item) {
+    function selecionarClinica(item: Clinica) {
             setClinica(item.nome);
             setCnpj(item.cnpj);
             setCep(item.cep);
@@ -66,10 +64,10 @@ export function useVetAlterarDados() {
             }
     
             const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
-            let usuarios = usuariosStorage ? JSON.parse(usuariosStorage) : [];
+            let usuarios: Usuario[] = usuariosStorage ? JSON.parse(usuariosStorage) : [];
     
-            const usuarioAtualizado = {
-                ...usuario,
+            const usuarioAtualizado: Usuario = {
+                ...usuario!,
                 nome,
                 especializacao,
                 clinica,
@@ -80,7 +78,7 @@ export function useVetAlterarDados() {
             };
     
             usuarios = usuarios.map((item) => {
-                if (item.id === usuario.id) return usuarioAtualizado;
+                if (item.id === usuario?.id) return usuarioAtualizado;
                 return item;
             });
     

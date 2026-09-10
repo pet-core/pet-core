@@ -1,10 +1,10 @@
 
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useAppNavigation } from "../types";
 
 export function useVetMenu() {
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     function alterarFoto() {
             Alert.alert(

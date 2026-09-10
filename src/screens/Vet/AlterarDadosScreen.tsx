@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Modal, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { especializacoes, clinicas } from "../../data/mockData";
-import { useNavigation } from "@react-navigation/native";
 import { useVetAlterarDados } from "../../hooks/useVetAlterarDados";
-export default function AlterarDados(props) {
+import { useAppNavigation } from "../../types";
+export default function AlterarDados() {
     const { usuario, setUsuario, nome, setNome, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, cep, setCep, complemento, setComplemento, mensagem, setMensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, buscarUsuario, selecionarClinica, salvar } = useVetAlterarDados();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <ScrollView contentContainerStyle={styles.container}>

@@ -1,19 +1,18 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { useRelatorios } from "../../hooks/useRelatorios";
-export default function Relatorios(props) {
-    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, prontuariosPet, setProntuariosPet, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, buscarProntuariosDoPet, selecionarTutor, selecionarPet, enviarRelatorio } = useRelatorios();
+import { examesDisponiveis } from "../../data/mockData";
+import { useVetExames } from "../../hooks/useVetExames";
+import { useAppNavigation } from "../../types";
+export default function Exames() {
+    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, exameSelecionado, setExameSelecionado, arquivoSolicitacao, setArquivoSolicitacao, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, modalExame, setModalExame, buscarDados, buscarPetsDoTutor, selecionarTutor, selecionarPet, selecionarExame, selecionarArquivo, enviarExame } = useVetExames();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <ScrollView contentContainerStyle={styles.container}>
-                <MaterialCommunityIcons name="file-chart-outline" size={50} color="#7167F6" alignSelf= "center"/>
-                <Text style={styles.titulo}>Emitir relatório</Text>
-    
+                <MaterialCommunityIcons name="test-tube" size={50} color="#7167F6" alignSelf= "center"/>
+                <Text style={styles.titulo}>Solicitar Exame</Text>
                 {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
-    
                 <TouchableOpacity style={styles.select} onPress={() => setModalTutor(true)}>
                     <Text style={tutorSelecionado ? styles.selectTexto : styles.selectPlaceholder}>
                     {tutorSelecionado ? tutorSelecionado.nome : "Selecionar tutor"}
@@ -29,29 +28,28 @@ export default function Relatorios(props) {
                 </TouchableOpacity>
     
                 {petSelecionado && (
-                    <View style={styles.cardPet}>
-                    <Text style={styles.petTitulo}>Histórico encontrado</Text>
-                    <Text style={styles.petTexto}>Pet: {petSelecionado.nome}</Text>
-                    <Text style={styles.petTexto}>
-                        Status do pet: {petSelecionado.obitoInformado ? "Óbito" : "Ativo"}
-                    </Text>
-                    <Text style={styles.petTexto}>Quantidade de prontuários: {prontuariosPet.length}</Text>
+                    <View style={styles.infoPet}>
+                        <Text style={styles.infoTexto}>Status do pet: {petSelecionado.obitoInformado ? "Óbito" : "Ativo"}</Text>
                     </View>
                 )}
     
-                {prontuariosPet.map((item) => (
-                    <View style={styles.prontuarioCard} key={item.id}>
-                    <Text style={styles.prontuarioTitulo}>Consulta: {item.dataConsulta}</Text>
-                    <Text style={styles.prontuarioTexto}>Temperatura: {item.temperatura}</Text>
-                    <Text style={styles.prontuarioTexto}>Peso: {item.peso}</Text>
-                    <Text style={styles.prontuarioTexto}>Tratamento: {item.tratamento}</Text>
-                    <Text style={styles.prontuarioTexto}>Observações: {item.observacoes}</Text>
-                    </View>
-                ))}
+                <TouchableOpacity style={styles.select} onPress={() => setModalExame(true)}>
+                    <Text style={exameSelecionado ? styles.selectTexto : styles.selectPlaceholder}>
+                        {exameSelecionado || "Selecionar exame"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#7167F6"/>
+                </TouchableOpacity>
     
-                <TouchableOpacity style={styles.btn} onPress={enviarRelatorio}>
+                <TouchableOpacity style={styles.btnArquivo} onPress={selecionarArquivo}>
+                    <Ionicons name="document-attach-outline" size={20} color="#7167F6"/>
+                    <Text style={styles.textoBtnArquivo}>
+                    {arquivoSolicitacao || "Selecionar arquivo de solicitação"}
+                    </Text>
+                </TouchableOpacity>
+    
+                <TouchableOpacity style={styles.btn} onPress={enviarExame}>
                     <Ionicons name="send" size={18} color="#fff"/>
-                    <Text style={styles.textoBtn}>Enviar relatório ao tutor</Text>
+                    <Text style={styles.textoBtn}>Enviar</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>
@@ -80,19 +78,31 @@ export default function Relatorios(props) {
                         <View style={styles.modalBox}>
                             <Text style={styles.modalTitulo}>Selecionar pet</Text>
                             {petsDoTutor.length === 0 && (
-                                <Text style={styles.modalItemSubtexto}>
-                                Selecione um tutor com pets cadastrados.
-                                </Text>
+                                <Text style={styles.modalItemSubtexto}>Selecione um tutor com pets cadastrados.</Text>
                             )}
                             {petsDoTutor.map((item) => (
                                 <TouchableOpacity key={item.id} style={styles.modalItem} onPress={() => selecionarPet(item)}>
                                     <Text style={styles.modalItemTexto}>{item.nome}</Text>
-                                    <Text style={styles.modalItemSubtexto}>
-                                        {item.especie} • {item.raca}
-                                    </Text>
+                                    <Text style={styles.modalItemSubtexto}>{item.especie} • {item.raca}</Text>
                                 </TouchableOpacity>
                             ))}
                             <TouchableOpacity style={styles.btnCancelar} onPress={() => setModalPet(false)}>
+                                <Text style={styles.textoCancelar}>Cancelar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+    
+                <Modal visible={modalExame} transparent animationType="slide">
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalBox}>
+                            <Text style={styles.modalTitulo}>Selecionar exame</Text>
+                            {examesDisponiveis.map((item, index) => (
+                                <TouchableOpacity key={index} style={styles.modalItem} onPress={() => selecionarExame(item)}>
+                                    <Text style={styles.modalItemTexto}>{item}</Text>
+                                </TouchableOpacity>
+                            ))}
+                            <TouchableOpacity style={styles.btnCancelar} onPress={() => setModalExame(false)}>
                                 <Text style={styles.textoCancelar}>Cancelar</Text>
                             </TouchableOpacity>
                         </View>
@@ -114,7 +124,7 @@ const styles = StyleSheet.create({
         color: "#7167F6",
         fontWeight: "bold",
         marginBottom: 20,
-        textAlign: "center"
+        textAlign: "center",
     },
 
     mensagem: {
@@ -148,46 +158,38 @@ const styles = StyleSheet.create({
         color: "#777",
     },
 
-    cardPet: {
+    infoPet: {
+        backgroundColor: "#f1f1f1",
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: "#7167F6",
+    },
+
+    infoTexto: {
+        fontSize: 16,
+        color: "#333",
+    },
+
+    btnArquivo: {
         backgroundColor: "#f1f1f1",
         borderWidth: 1.5,
         borderColor: "#7167F6",
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 12,
-    },
-
-    petTitulo: {
-        color: "#7167F6",
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 8,
-    },
-
-    petTexto: {
-        fontSize: 15,
-        color: "#333",
-        marginBottom: 3,
-    },
-
-    prontuarioCard: {
-        backgroundColor: "#fff",
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 10,
+        borderRadius: 8,
+        minHeight: 50,
         padding: 12,
-        marginBottom: 10,
+        justifyContent: "center",
+        marginBottom: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
     },
 
-    prontuarioTitulo: {
+    textoBtnArquivo: {
         color: "#7167F6",
         fontWeight: "bold",
-        marginBottom: 6,
-    },
-
-    prontuarioTexto: {
-        color: "#333",
-        marginBottom: 3,
+        flex: 1,
     },
 
     btn: {
@@ -203,7 +205,7 @@ const styles = StyleSheet.create({
 
     textoBtn: {
         color: "#fff",
-        fontSize: 18,
+        fontSize: 18, 
         fontWeight: "bold",
     },
 

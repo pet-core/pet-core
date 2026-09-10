@@ -2,12 +2,12 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { useNavigation } from "@react-navigation/native";
 import { useVetHome } from "../../hooks/useVetHome";
-export default function Home(props) {
+import { useAppNavigation } from "../../types";
+export default function Home() {
     const { usuario, setUsuario, buscarUsuario } = useVetHome();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>

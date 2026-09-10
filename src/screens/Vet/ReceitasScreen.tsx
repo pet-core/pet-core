@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useVetReceitas } from "../../hooks/useVetReceitas";
-export default function Receitas(props) {
+import { useAppNavigation } from "../../types";
+export default function Receitas() {
     const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, arquivoReceita, setArquivoReceita, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, selecionarTutor, selecionarPet, selecionarArquivo, enviarReceita } = useVetReceitas();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <ScrollView contentContainerStyle={styles.container}>

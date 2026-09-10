@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Modal } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { protocolos } from "../../data/mockData";
-import { useNavigation } from "@react-navigation/native";
 import { useProtocolos } from "../../hooks/useProtocolos";
-export default function Protocolos(props) {
+import { useAppNavigation } from "../../types";
+export default function Protocolos() {
     const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, protocoloSelecionado, setProtocoloSelecionado, mostrarFormulario, setMostrarFormulario, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, abrirFormulario, selecionarTutor, selecionarPet, enviarProtocolo } = useProtocolos();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>

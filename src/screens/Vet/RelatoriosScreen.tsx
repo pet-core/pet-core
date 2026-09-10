@@ -1,16 +1,16 @@
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Modal } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { useProntuario } from "../../hooks/useProntuario";
-export default function Prontuario(props) {
-    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, dataConsulta, setDataConsulta, temperatura, setTemperatura, peso, setPeso, tratamento, setTratamento, observacoes, setObservacoes, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, selecionarTutor, selecionarPet, formatarData, salvarProntuario } = useProntuario();
+import { useRelatorios } from "../../hooks/useRelatorios";
+import { useAppNavigation } from "../../types";
+export default function Relatorios() {
+    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, prontuariosPet, setProntuariosPet, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, buscarProntuariosDoPet, selecionarTutor, selecionarPet, enviarRelatorio } = useRelatorios();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <ScrollView contentContainerStyle={styles.container}>
-                <MaterialCommunityIcons name="clipboard-text-outline" size={50} color="#7167F6" alignSelf= "center"/>
-                <Text style={styles.titulo}>Preencher prontuário</Text>
+                <MaterialCommunityIcons name="file-chart-outline" size={50} color="#7167F6" alignSelf= "center"/>
+                <Text style={styles.titulo}>Emitir relatório</Text>
     
                 {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
     
@@ -30,30 +30,28 @@ export default function Prontuario(props) {
     
                 {petSelecionado && (
                     <View style={styles.cardPet}>
-                    <Text style={styles.petTitulo}>Dados do pet</Text>
-                    <Text style={styles.petTexto}>Data de nascimento: {petSelecionado.nascimento}</Text>
-                    <Text style={styles.petTexto}>Raça: {petSelecionado.raca}</Text>
-                    <Text style={styles.petTexto}>Espécie: {petSelecionado.especie}</Text>
-                    <Text style={styles.petTexto}>Porte: {petSelecionado.porte}</Text>
-                    <Text style={styles.petTexto}>Pelagem: {petSelecionado.pelagem}</Text>
-                    <Text style={styles.petTexto}>Sexo: {petSelecionado.sexo}</Text>
+                    <Text style={styles.petTitulo}>Histórico encontrado</Text>
+                    <Text style={styles.petTexto}>Pet: {petSelecionado.nome}</Text>
                     <Text style={styles.petTexto}>
                         Status do pet: {petSelecionado.obitoInformado ? "Óbito" : "Ativo"}
                     </Text>
+                    <Text style={styles.petTexto}>Quantidade de prontuários: {prontuariosPet.length}</Text>
                     </View>
                 )}
     
-                <Text style={styles.subtitulo}>Dados clínicos</Text>
+                {prontuariosPet.map((item) => (
+                    <View style={styles.prontuarioCard} key={item.id}>
+                    <Text style={styles.prontuarioTitulo}>Consulta: {item.dataConsulta}</Text>
+                    <Text style={styles.prontuarioTexto}>Temperatura: {item.temperatura}</Text>
+                    <Text style={styles.prontuarioTexto}>Peso: {item.peso}</Text>
+                    <Text style={styles.prontuarioTexto}>Tratamento: {item.tratamento}</Text>
+                    <Text style={styles.prontuarioTexto}>Observações: {item.observacoes}</Text>
+                    </View>
+                ))}
     
-                <TextInput placeholder="Data da consulta" style={styles.input} value={dataConsulta} keyboardType="numeric" maxLength={10} onChangeText={(value) => setDataConsulta(formatarData(value))}/>
-                <TextInput placeholder="Temperatura" style={styles.input} onChangeText={setTemperatura}/>
-                <TextInput placeholder="Peso" style={styles.input} value={peso} onChangeText={setPeso}/>
-                <TextInput placeholder="Tratamento" style={styles.input} value={tratamento} onChangeText={setTratamento}/>
-                <TextInput placeholder="Observações" style={styles.textArea} value={observacoes} onChangeText={setObservacoes} multiline/>
-    
-                <TouchableOpacity style={styles.btn} onPress={salvarProntuario}>
-                    <Ionicons name="save-outline" size={18} color="#fff"/>
-                    <Text style={styles.textoBtn}>Salvar prontuário</Text>
+                <TouchableOpacity style={styles.btn} onPress={enviarRelatorio}>
+                    <Ionicons name="send" size={18} color="#fff"/>
+                    <Text style={styles.textoBtn}>Enviar relatório ao tutor</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>
@@ -116,15 +114,7 @@ const styles = StyleSheet.create({
         color: "#7167F6",
         fontWeight: "bold",
         marginBottom: 20,
-        textAlign: "center",
-    },
-
-    subtitulo: {
-        fontSize: 20,
-        color: "#7167F6",
-        fontWeight: "bold",
-        marginTop: 12,
-        marginBottom: 12,
+        textAlign: "center"
     },
 
     mensagem: {
@@ -180,26 +170,26 @@ const styles = StyleSheet.create({
         marginBottom: 3,
     },
 
-    input: {
-        height: 50,
-        backgroundColor: "#e5e5e5",
-        borderWidth: 1.5,
-        borderColor: "#7167F6",
-        borderRadius: 8,
-        paddingHorizontal: 12,
+    prontuarioCard: {
+        backgroundColor: "#fff",
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 10,
+        padding: 12,
         marginBottom: 10,
     },
-    textArea: {
-        height: 100,
-        backgroundColor: "#e5e5e5",
-        borderWidth: 1.5,
-        borderColor: "#7167F6",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingTop: 12,
-        marginBottom: 10,
-        textAlignVertical: "top",
+
+    prontuarioTitulo: {
+        color: "#7167F6",
+        fontWeight: "bold",
+        marginBottom: 6,
     },
+
+    prontuarioTexto: {
+        color: "#333",
+        marginBottom: 3,
+    },
+
     btn: {
         backgroundColor: "#7167F6",
         height: 48,
@@ -210,7 +200,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         gap: 8,
     },
-    
+
     textoBtn: {
         color: "#fff",
         fontSize: 18,

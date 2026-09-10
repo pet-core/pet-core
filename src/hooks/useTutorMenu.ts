@@ -1,10 +1,9 @@
 
 import { Alert } from "react-native";
-import { useAppNavigation } from "../types";
-import { encerrarSessao } from "../services/authStorage";
+import { useAuth } from "../context/AuthContext";
 
 export function useTutorMenu() {
-    const navigation = useAppNavigation();
+    const { logout } = useAuth();
 
     function alterarFoto() {
             Alert.alert(
@@ -18,8 +17,7 @@ export function useTutorMenu() {
         }
 
     async function sair() {
-            await encerrarSessao();
-            navigation.replace("Login");
+            await logout();
         }
 
     return {

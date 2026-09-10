@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useAuth } from "../context/AuthContext";
 import type { RootStackParamList } from "../types/navigation";
 
 import SplashScreen from "../screens/SplashScreen";
@@ -29,18 +30,46 @@ import VetRelatoriosScreen from "../screens/Vet/RelatoriosScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Stack única e "flat", igual à navegação que já existia no expo-router
-// (não havia layouts aninhados: era tudo uma pilha só). Proteção de rotas
-// por tipo de perfil (tutor/veterinário) fica para a etapa em que o
-// contexto de autenticação for introduzido.
-export default function AppNavigator() {
-    return (
-        <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Splash" component={SplashScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Cadastro" component={CadastroScreen} />
-            <Stack.Screen name="Erro" component={ErroScreen} />
+const screenOptions = { headerShown: false } as const;
 
+export default function AppNavigator() {
+    const { autenticado, carregando, usuario } = useAuth();
+
+    if (carregando) {
+        return (
+            <Stack.Navigator screenOptions={screenOptions}>
+                <Stack.Screen name="Splash" component={SplashScreen} />
+            </Stack.Navigator>
+        );
+    }
+
+    if (!autenticado || !usuario) {
+        return (
+            <Stack.Navigator screenOptions={screenOptions}>
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Cadastro" component={CadastroScreen} />
+                <Stack.Screen name="Erro" component={ErroScreen} />
+            </Stack.Navigator>
+        );
+    }
+
+    if (usuario.tipoPerfil === "veterinario") {
+        return (
+            <Stack.Navigator screenOptions={screenOptions}>
+                <Stack.Screen name="VetHome" component={VetHomeScreen} />
+                <Stack.Screen name="VetMenu" component={VetMenuScreen} />
+                <Stack.Screen name="VetAlterarDados" component={VetAlterarDadosScreen} />
+                <Stack.Screen name="VetExames" component={VetExamesScreen} />
+                <Stack.Screen name="VetProntuario" component={VetProntuarioScreen} />
+                <Stack.Screen name="VetProtocolos" component={VetProtocolosScreen} />
+                <Stack.Screen name="VetReceitas" component={VetReceitasScreen} />
+                <Stack.Screen name="VetRelatorios" component={VetRelatoriosScreen} />
+            </Stack.Navigator>
+        );
+    }
+
+    return (
+        <Stack.Navigator screenOptions={screenOptions}>
             <Stack.Screen name="TutorHome" component={TutorHomeScreen} />
             <Stack.Screen name="TutorMenu" component={TutorMenuScreen} />
             <Stack.Screen name="TutorAdicionarPet" component={TutorAdicionarPetScreen} />
@@ -52,15 +81,6 @@ export default function AppNavigator() {
             <Stack.Screen name="TutorPetDetalhe" component={TutorPetDetalheScreen} />
             <Stack.Screen name="TutorEditarPet" component={TutorEditarPetScreen} />
             <Stack.Screen name="TutorReceitas" component={TutorReceitasScreen} />
-
-            <Stack.Screen name="VetHome" component={VetHomeScreen} />
-            <Stack.Screen name="VetMenu" component={VetMenuScreen} />
-            <Stack.Screen name="VetAlterarDados" component={VetAlterarDadosScreen} />
-            <Stack.Screen name="VetExames" component={VetExamesScreen} />
-            <Stack.Screen name="VetProntuario" component={VetProntuarioScreen} />
-            <Stack.Screen name="VetProtocolos" component={VetProtocolosScreen} />
-            <Stack.Screen name="VetReceitas" component={VetReceitasScreen} />
-            <Stack.Screen name="VetRelatorios" component={VetRelatoriosScreen} />
         </Stack.Navigator>
     );
 }

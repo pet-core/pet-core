@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useVetAlterarDados } from "../../hooks/useVetAlterarDados";
 import { useAppNavigation } from "../../types";
 export default function AlterarDados() {
-    const { nome, setNome, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, cep, setCep, complemento, setComplemento, mensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, especializacoes, clinicas, carregando, salvando, erroCatalogos, buscarUsuario, selecionarClinica, salvar } = useVetAlterarDados();
+    const { nome, setNome, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, cep, setCep, complemento, setComplemento, mensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, especializacoes, clinicas, carregando, salvando, erroCatalogos, selecionarClinica, salvar } = useVetAlterarDados();
 
     const navigation = useAppNavigation();
 
@@ -32,7 +32,7 @@ export default function AlterarDados() {
     
                 <TextInput placeholder="CNPJ da clínica" style={styles.input} value={cnpj} onChangeText={setCnpj}/>
                 <TextInput placeholder="CEP da clínica" style={styles.input} value={cep} onChangeText={setCep}/>
-                <TextInput placeholder="Complemento" style={styles.input} onChangeText={setComplemento}/>
+                <TextInput placeholder="Complemento" style={styles.input} value={complemento} onChangeText={setComplemento}/>
     
                 <TouchableOpacity style={styles.btn} onPress={salvar} disabled={carregando || salvando}>
                     <Text style={styles.textoBtn}>{salvando ? "Salvando..." : carregando ? "Carregando..." : "Salvar"}</Text>

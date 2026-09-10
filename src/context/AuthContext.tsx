@@ -1,5 +1,4 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { TipoPerfil } from "../types/models";
 import { login as loginApi } from "../services/api/authApiService";
 import { encerrarSessao as limparSessao, obterSessao, salvarSessao, type AuthSession } from "../services/authStorage";
 
@@ -72,7 +71,3 @@ export function useAuth(): AuthContextValue {
     return context;
 }
 
-export function perfilInicial(usuario: AuthSession["usuario"] | null): "VetHome" | "TutorHome" | "Login" {
-    if (!usuario) return "Login";
-    return usuario.tipoPerfil === ("veterinario" satisfies TipoPerfil) ? "VetHome" : "TutorHome";
-}

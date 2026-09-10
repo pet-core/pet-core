@@ -17,7 +17,3 @@ export async function cadastrar(request: CadastroRequest): Promise<CadastroRespo
     return response.data;
 }
 
-export async function obterUsuarioAtual() {
-    const response = await apiClient.get(API_ROUTES.auth.me);
-    return response.data;
-}

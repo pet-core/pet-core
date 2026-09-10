@@ -3,7 +3,13 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRelatorios } from "../../hooks/useRelatorios";
 import { useAppNavigation } from "../../types";
 export default function Relatorios() {
-    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, prontuariosPet, setProntuariosPet, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, buscarProntuariosDoPet, selecionarTutor, selecionarPet, enviarRelatorio } = useRelatorios();
+    const {
+        tutores, tutorSelecionado, petsDoTutor, petSelecionado, prontuariosPet, mensagem,
+        setMensagem, modalTutor, setModalTutor, modalPet, setModalPet,
+        selecionarTutor, selecionarPet, enviarRelatorio,
+        carregandoTutores, carregandoPets, carregandoProntuarios, enviando,
+        erroTutores, erroPets, erroProntuarios, atualizar,
+    } = useRelatorios();
 
     const navigation = useAppNavigation();
 
@@ -13,17 +19,23 @@ export default function Relatorios() {
                 <Text style={styles.titulo}>Emitir relatório</Text>
     
                 {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
+
+                {(erroTutores || erroPets || erroProntuarios) && (
+                    <TouchableOpacity onPress={atualizar}>
+                        <Text style={styles.mensagem}>Não foi possível carregar os dados. Toque para tentar novamente.</Text>
+                    </TouchableOpacity>
+                )}
     
-                <TouchableOpacity style={styles.select} onPress={() => setModalTutor(true)}>
+                <TouchableOpacity style={styles.select} onPress={() => setModalTutor(true)} disabled={carregandoTutores}>
                     <Text style={tutorSelecionado ? styles.selectTexto : styles.selectPlaceholder}>
-                    {tutorSelecionado ? tutorSelecionado.nome : "Selecionar tutor"}
+                    {carregandoTutores ? "Carregando tutores..." : tutorSelecionado ? tutorSelecionado.nome : "Selecionar tutor"}
                     </Text>
                     <Ionicons name="chevron-down" size={20} color="#7167F6"/>
                 </TouchableOpacity>
     
-                <TouchableOpacity style={styles.select} onPress={() => setModalPet(true)}>
+                <TouchableOpacity style={styles.select} onPress={() => setModalPet(true)} disabled={!tutorSelecionado || carregandoPets}>
                     <Text style={petSelecionado ? styles.selectTexto : styles.selectPlaceholder}>
-                    {petSelecionado ? petSelecionado.nome : "Selecionar pet"}
+                    {carregandoPets ? "Carregando pets..." : petSelecionado ? petSelecionado.nome : "Selecionar pet"}
                     </Text>
                     <Ionicons name="chevron-down" size={20} color="#7167F6"/>
                 </TouchableOpacity>
@@ -35,7 +47,9 @@ export default function Relatorios() {
                     <Text style={styles.petTexto}>
                         Status do pet: {petSelecionado.obitoInformado ? "Óbito" : "Ativo"}
                     </Text>
-                    <Text style={styles.petTexto}>Quantidade de prontuários: {prontuariosPet.length}</Text>
+                    <Text style={styles.petTexto}>
+                        {carregandoProntuarios ? "Carregando prontuários..." : `Quantidade de prontuários: ${prontuariosPet.length}`}
+                    </Text>
                     </View>
                 )}
     
@@ -49,9 +63,9 @@ export default function Relatorios() {
                     </View>
                 ))}
     
-                <TouchableOpacity style={styles.btn} onPress={enviarRelatorio}>
+                <TouchableOpacity style={styles.btn} onPress={enviarRelatorio} disabled={enviando || carregandoProntuarios}>
                     <Ionicons name="send" size={18} color="#fff"/>
-                    <Text style={styles.textoBtn}>Enviar relatório ao tutor</Text>
+                    <Text style={styles.textoBtn}>{enviando ? "Enviando..." : "Enviar relatório ao tutor"}</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>

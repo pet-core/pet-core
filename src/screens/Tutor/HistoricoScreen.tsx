@@ -3,7 +3,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useHistorico } from "../../hooks/useHistorico";
 import { useAppNavigation } from "../../types";
 export default function Historico() {
-    const { usuario, setUsuario, pets, setPets, petSelecionado, setPetSelecionado, historicos, setHistoricos, mensagem, setMensagem, cardAberto, setCardAberto, modalPet, setModalPet, buscarDados, selecionarPet, solicitarHistorico, abrirCard } = useHistorico();
+    const { pets, petSelecionado, historicos, mensagem, cardAberto, modalPet, setModalPet, selecionarPet, solicitarHistorico, abrirCard, atualizar, carregando, atualizando, salvando, erro } = useHistorico();
 
     const navigation = useAppNavigation();
 
@@ -12,6 +12,8 @@ export default function Historico() {
                 <MaterialCommunityIcons name="file-chart-outline" size={50} color="#7167F6" alignSelf= "center"/>
                 <Text style={styles.titulo}>Histórico do Pet</Text>
     
+                {erro && <Text style={styles.erro}>Não foi possível carregar os dados. Tente novamente.</Text>}
+
                 <View style={styles.bloco}>
                     <Text style={styles.subtitulo}>Solicitar histórico</Text>
     
@@ -28,33 +30,49 @@ export default function Historico() {
                         <Ionicons name="chevron-down" size={20} color="#7167F6"/>
                     </TouchableOpacity>
     
-                    <TouchableOpacity style={styles.btn} onPress={solicitarHistorico}>
+                    <TouchableOpacity style={[styles.btn, salvando && styles.btnDesabilitado]} onPress={solicitarHistorico} disabled={salvando}>
                         <Ionicons name="send" size={18} color="#fff"/>
-                        <Text style={styles.textoBtn}>Solicitar histórico</Text>
+                        <Text style={styles.textoBtn}>{salvando ? "Enviando..." : "Solicitar histórico"}</Text>
                     </TouchableOpacity>
     
                     {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
                 </View>
     
-                <Text style={styles.subtitulo}>Históricos recebidos</Text>
-    
-                <FlatList data={historicos} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>Nenhum histórico recebido.</Text>} renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.card} onPress={() => abrirCard(item.id)}>
-                        <Text style={styles.cardTitulo}>{item.petNome}</Text>
-                        <Text style={styles.cardSubtitulo}>Data de emissão: {item.dataEmissao}</Text>
-    
-                        {cardAberto === item.id && (
-                            <View style={styles.areaDocumento}>
-                                <Text style={styles.label}>Documento:</Text>
-                                <TouchableOpacity style={styles.linkArea} onPress={() => navigation.navigate("Erro")}>
-                                    <Ionicons name="document-text-outline" size={18} color="#7167F6"/>
-                                    <Text style={styles.link}>{item.arquivoHistorico}</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
+                <View style={styles.cabecalhoHistoricos}>
+                    <Text style={styles.subtitulo}>Históricos recebidos</Text>
+                    <TouchableOpacity onPress={atualizar} disabled={atualizando}>
+                        <Ionicons name="refresh" size={22} color="#7167F6" />
                     </TouchableOpacity>
-                )}/>
-    
+                </View>
+
+                {carregando ? (
+                    <Text style={styles.vazio}>Carregando...</Text>
+                ) : (
+                    <FlatList
+                        data={historicos}
+                        keyExtractor={(item) => item.id}
+                        refreshing={atualizando}
+                        onRefresh={atualizar}
+                        ListEmptyComponent={<Text style={styles.vazio}>Nenhum histórico recebido.</Text>}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity style={styles.card} onPress={() => abrirCard(item.id)}>
+                                <Text style={styles.cardTitulo}>{item.petNome}</Text>
+                                <Text style={styles.cardSubtitulo}>Data de emissão: {item.dataEmissao ?? "Não informada"}</Text>
+
+                                {cardAberto === item.id && (
+                                    <View style={styles.areaDocumento}>
+                                        <Text style={styles.label}>Documento:</Text>
+                                        <TouchableOpacity style={styles.linkArea} onPress={() => navigation.navigate("Erro")}>
+                                            <Ionicons name="document-text-outline" size={18} color="#7167F6"/>
+                                            <Text style={styles.link}>{item.arquivoHistorico ?? "Documento indisponível"}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        )}
+                    />
+                )}
+
                 <Modal visible={modalPet} transparent animationType="slide">
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalBox}>
@@ -133,6 +151,19 @@ const styles = StyleSheet.create({
         color: "#777",
     },
 
+    cabecalhoHistoricos: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 12,
+    },
+
+    erro: {
+        color: "#b42318",
+        marginBottom: 12,
+        textAlign: "center",
+    },
+
     btn: {
         backgroundColor: "#7167F6",
         height: 48,
@@ -141,6 +172,10 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flexDirection: "row",
         gap: 8,
+    },
+
+    btnDesabilitado: {
+        opacity: 0.6,
     },
 
     textoBtn: {

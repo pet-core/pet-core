@@ -1,0 +1,131 @@
+import { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+
+export function useTutorAlterarDados() {
+    const navigation = useNavigation();
+
+    const [usuario, setUsuario] = useState(null);
+
+    const [nome, setNome] = useState("");
+
+    const [nascimento, setNascimento] = useState("");
+
+    const [telefone, setTelefone] = useState("");
+
+    const [genero, setGenero] = useState("");
+
+    const [email, setEmail] = useState("");
+
+    const [senha, setSenha] = useState("");
+
+    const [confirmarSenha, setConfirmarSenha] = useState("");
+
+    const [mensagem, setMensagem] = useState("");
+
+    useEffect(() => {
+            buscarUsuario();
+        }, []);
+
+    async function buscarUsuario() {
+            const usuarioStorage = await AsyncStorage.getItem("USUARIO_LOGADO");
+    
+            if (usuarioStorage !== null) {
+                const user = JSON.parse(usuarioStorage);
+                setUsuario(user);
+                setNome(user.nome || "");
+                setNascimento(user.nascimento || "");
+                setTelefone(user.telefone || "");
+                setGenero(user.genero || "");
+                setEmail(user.email || "");
+                setSenha(user.senha || "");
+                setConfirmarSenha(user.senha || "");
+            }
+        }
+
+    function formatarData(texto) {
+            let numeros = texto.replace(/\D/g, "");
+            if (numeros.length > 8) numeros = numeros.slice(0, 8);
+            if (numeros.length > 4) return `${numeros.slice(0, 2)}/${numeros.slice(2, 4)}/${numeros.slice(4)}`;
+            if (numeros.length > 2) return `${numeros.slice(0, 2)}/${numeros.slice(2)}`;
+            return numeros;
+        }
+
+    function formatarTelefone(texto) {
+            let numeros = texto.replace(/\D/g, "");
+            if (numeros.length > 11) numeros = numeros.slice(0, 11);
+            if (numeros.length > 10) return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
+            if (numeros.length > 6) return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
+            if (numeros.length > 2) return `(${numeros.slice(0, 2)}) ${numeros.slice(2)}`;
+            return numeros;
+        }
+
+    async function salvar() {
+            if (!nome || nome.trim() === "") {
+                setMensagem("Informe o nome.");
+                return;
+            }
+    
+            if (!email || email.trim() === "") {
+                setMensagem("Informe o e-mail.");
+                return;
+            }
+    
+            if (!senha || senha.trim() === "") {
+                setMensagem("Informe a senha.");
+                return;
+            }
+    
+            if (senha !== confirmarSenha) {
+                setMensagem("As senhas não conferem.");
+                return;
+            }
+    
+            const usuariosStorage = await AsyncStorage.getItem("USUARIOS");
+            let usuarios = usuariosStorage ? JSON.parse(usuariosStorage) : [];
+    
+            const usuarioAtualizado = {
+                ...usuario,
+                nome,
+                nascimento,
+                telefone,
+                genero,
+                email,
+                senha,
+            };
+    
+            usuarios = usuarios.map((item) => {
+                if (item.id === usuario.id) return usuarioAtualizado;
+                return item;
+            });
+    
+            await AsyncStorage.setItem("USUARIOS", JSON.stringify(usuarios));
+            await AsyncStorage.setItem("USUARIO_LOGADO", JSON.stringify(usuarioAtualizado));
+            setMensagem("Dados atualizados com sucesso.");
+        }
+
+    return {
+        usuario,
+        setUsuario,
+        nome,
+        setNome,
+        nascimento,
+        setNascimento,
+        telefone,
+        setTelefone,
+        genero,
+        setGenero,
+        email,
+        setEmail,
+        senha,
+        setSenha,
+        confirmarSenha,
+        setConfirmarSenha,
+        mensagem,
+        setMensagem,
+        buscarUsuario,
+        formatarData,
+        formatarTelefone,
+        salvar,
+    };
+}

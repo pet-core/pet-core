@@ -64,7 +64,7 @@ Este projeto foi desenvolvido com:
 - React Native
 - Expo
 - React Navigation (Native Stack)
-- JavaScript
+- TypeScript
 - AsyncStorage
 - React Native Safe Area Context
 - Expo Vector Icons
@@ -84,26 +84,30 @@ Visualização de dados dos pets cadastrados.
 
 ## 🗂 Estrutura de pastas
 ```
-App.js                      -> entry point, monta o NavigationContainer
+App.tsx                      -> entry point, monta o NavigationContainer
 src/
   navigation/
-    AppNavigator.jsx         -> Stack único com todas as telas do app
+    AppNavigator.tsx         -> Stack único com todas as telas do app
   screens/
     Auth/                    -> Login, Cadastro
     Common/                  -> Erro
     Tutor/                   -> telas do perfil tutor
     Vet/                     -> telas do perfil veterinário
-    SplashScreen.jsx
-  hooks/                     -> lógica de cada tela (state, handlers, side-effects)
+    SplashScreen.tsx
+  hooks/                     -> lógica de cada tela (state, handlers, side-effects), em .ts
   services/
-    storage.js                -> acesso centralizado ao AsyncStorage
+    storage.ts                -> acesso centralizado ao AsyncStorage (tipado)
   data/
-    mockData.js                -> dados mockados de usuários e pets
-  components/                 -> Header, Footer, PetCard
+    mockData.ts                -> dados mockados de usuários e pets (tipados)
+  types/
+    models.ts                  -> tipos de domínio (Usuario, Pet, Clinica, Protocolo...)
+    navigation.ts               -> RootStackParamList (tipagem das rotas)
+  components/                 -> Header, Footer, PetCard (.tsx)
 ```
 Cada tela segue o padrão **View + Hook**: o arquivo em `src/screens` cuida apenas
 da renderização (JSX/estilos) e o hook correspondente em `src/hooks`
-concentra estado, chamadas ao AsyncStorage e regras de navegação.
+concentra estado, chamadas ao AsyncStorage e regras de navegação. Todo o
+projeto é escrito em TypeScript; rode `npm run typecheck` para validar os tipos.
 
 ## 🛠 Dependências principais
 - npx expo install @react-navigation/native @react-navigation/native-stack

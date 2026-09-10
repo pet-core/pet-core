@@ -5,16 +5,14 @@ import type { TipoPerfil, Usuario } from "../../types/models";
 type UsuarioSemSenha = Omit<Usuario, "senha">;
 
 export async function listarUsuarios(tipoPerfil?: TipoPerfil): Promise<UsuarioSemSenha[]> {
-    const response = await apiClient.get<UsuarioSemSenha[]>(API_ROUTES.users.list, {
-        params: tipoPerfil ? { tipoPerfil } : undefined,
-    });
+    const rota = tipoPerfil === "veterinario" ? API_ROUTES.medico.list : API_ROUTES.tutor.list;
+    const response = await apiClient.get<UsuarioSemSenha[]>(rota);
     return response.data;
 }
 
 export async function listarTutores(): Promise<UsuarioSemSenha[]> {
     return listarUsuarios("tutor");
 }
-
 
 export interface AtualizarUsuarioRequest {
     nome: string;
@@ -31,7 +29,18 @@ export interface AtualizarUsuarioRequest {
     nascimento?: string;
 }
 
-export async function atualizarMeuUsuario(dados: AtualizarUsuarioRequest): Promise<UsuarioSemSenha> {
-    const response = await apiClient.patch<UsuarioSemSenha>(API_ROUTES.users.me, dados);
-    return response.data;
+export async function buscarUsuario(id: string, tipoPerfil: TipoPerfil): Promise<UsuarioSemSenha> {
+    const rota = tipoPerfil === "veterinario" ? API_ROUTES.medico.detail(id) : API_ROUTES.tutor.detail(id);
+    const response = await apiClient.get<UsuarioSemSenha>(rota);
+    return { ...response.data, id, tipoPerfil };
+}
+
+export async function atualizarUsuario(
+    id: string,
+    tipoPerfil: TipoPerfil,
+    dados: AtualizarUsuarioRequest,
+): Promise<UsuarioSemSenha> {
+    const rota = tipoPerfil === "veterinario" ? API_ROUTES.medico.patch(id) : API_ROUTES.tutor.patch(id);
+    const response = await apiClient.put<UsuarioSemSenha>(rota, dados);
+    return { ...response.data, id, tipoPerfil };
 }

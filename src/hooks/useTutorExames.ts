@@ -4,7 +4,7 @@ import { useClinicalRecords } from "./api/useClinicalRecords";
 
 export function useTutorExames() {
     const { usuario } = useAuth();
-    const { data: registros = [], isLoading, isError, error, refetch } = useClinicalRecords();
+    const { data: registros = [], isLoading, isError, error, refetch } = useClinicalRecords("exame");
     const [cardAberto, setCardAberto] = useState<string | null>(null);
 
     const exames = registros.filter((item) => item.tutorId === usuario?.id && Boolean(item.tipoExame));

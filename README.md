@@ -108,8 +108,8 @@ protocolos, avisos e relatórios são obtidos pela API. Não há dados de `mockD
 
 ## 🔐 Autenticação e navegação
 
-- `POST /auth/login` realiza o login real e retorna token + usuário.
-- `POST /auth/register` realiza o cadastro real.
+- `GET /api/Tutor/login` e `GET /api/Medico/login` realizam o login real.
+- `POST /api/Tutor` e `POST /api/Medico` realizam o cadastro real.
 - O token é enviado automaticamente como `Authorization: Bearer ...` pelo cliente Axios.
 - A sessão é restaurada ao iniciar o aplicativo.
 - Rotas públicas ficam disponíveis somente sem sessão.

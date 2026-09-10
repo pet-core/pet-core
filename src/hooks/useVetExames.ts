@@ -11,7 +11,7 @@ export function useVetExames() {
     const { usuario } = useAuth();
     const tutoresQuery = useTutores();
     const examesQuery = useExames();
-    const criarRegistro = useCriarClinicalRecord();
+    const criarRegistro = useCriarClinicalRecord("exame");
     const [tutorSelecionado, setTutorSelecionado] = useState<UsuarioSemSenha | null>(null);
     const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
     const [exameSelecionado, setExameSelecionado] = useState("");

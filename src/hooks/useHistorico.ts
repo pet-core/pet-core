@@ -12,8 +12,8 @@ export function useHistorico() {
     const [modalPet, setModalPet] = useState(false);
 
     const petsQuery = usePets(usuario?.id, Boolean(usuario?.id));
-    const registrosQuery = useClinicalRecords();
-    const criarRegistro = useCriarClinicalRecord();
+    const registrosQuery = useClinicalRecords("historico");
+    const criarRegistro = useCriarClinicalRecord("historico");
 
     const historicos = useMemo(
         () => (registrosQuery.data ?? []).filter(

@@ -1,13 +1,8 @@
-# Sprint 3 — Comedouro integrado à API
+# Comedouro
 
-A funcionalidade de Comedouro foi migrada para a camada HTTP da aplicação.
+A tela utiliza o recurso Pet do backend.
 
-## Fluxo
+- Pets: `GET /api/Pet`
+- Atualização do status: `PUT /api/Pet/{id}/patch`
 
-- Os pets são consultados com `GET /pets?tutorId=...` através de Axios + TanStack Query.
-- O usuário autenticado vem do `AuthContext`.
-- Ao encher o comedouro, o pet é atualizado com `PUT /pets/:id`.
-- A invalidação da query de pets atualiza a interface automaticamente.
-- Loading, atualização, erro e tentativa novamente são tratados pela interface.
-
-A funcionalidade não usa mais `getPetsByTutor`, `updatePet` ou dados de `mockData` para alimentar a tela.
+A atualização invalida a consulta de pets no TanStack Query para refletir a mudança automaticamente.

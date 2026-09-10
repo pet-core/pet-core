@@ -12,7 +12,7 @@ export function useProtocolos() {
     const { usuario } = useAuth();
     const tutoresQuery = useTutores();
     const protocolosQuery = useProtocolosApi();
-    const criarRegistro = useCriarClinicalRecord();
+    const criarRegistro = useCriarClinicalRecord("protocolo");
 
     const [tutorSelecionado, setTutorSelecionado] = useState<UsuarioSemSenha | null>(null);
     const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);

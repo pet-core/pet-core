@@ -1,19 +1,11 @@
-# Sprint 3 — remoção do armazenamento legado
+# Migração final de dados locais
 
-## O que foi alterado
+A aplicação não utiliza dados mockados para alimentar as telas do Sprint 3.
 
-- A tela de cadastro passou a consumir as listas de especializações e clínicas pela API usando Axios + TanStack Query.
-- Os dados de catálogo não são mais importados de `src/data/mockData.ts`.
-- Os serviços legados de armazenamento de usuários/pets/registros clínicos foram removidos porque não possuem mais consumidores no fluxo atual da aplicação.
-- O `AsyncStorage` continua sendo utilizado somente pelo `authStorage`, exclusivamente para persistência da sessão autenticada.
+O acesso aos dados passa pelos serviços HTTP em `src/services/api`, usando Axios e TanStack Query.
 
-## Estado da migração
+A única persistência local é a sessão de autenticação em `AsyncStorage`, sem armazenamento da senha.
 
-Os dados funcionais migrados no Sprint 3 devem ser obtidos pela camada de API. O armazenamento local restante é deliberadamente limitado à persistência do token e do usuário da sessão.
+## Rotas
 
-## Contratos de catálogo utilizados
-
-- `GET /catalogos/especializacoes`
-- `GET /catalogos/clinicas`
-
-Esses endpoints continuam esquemáticos até que o backend oficial forneça os contratos definitivos.
+O contrato atual está centralizado em `src/api/routes.ts` e documentado em `README_SPRINT3_ROUTES.md`.

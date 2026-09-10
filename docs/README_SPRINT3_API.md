@@ -1,46 +1,45 @@
-# Sprint 3 — Contrato inicial da API
+# API — Sprint 3
 
-Esta etapa prepara a camada de integração HTTP sem depender dos endpoints de domínio definitivos do backend.
+O mobile usa **Axios** como único cliente HTTP e **TanStack Query** para consultas e mutações.
 
-## Camadas
+A URL configurada em `EXPO_PUBLIC_API_URL` deve apontar para o host do backend. As rotas incluem o prefixo `/api` conforme a documentação oficial do PetCore-.NET.
 
-- `src/api/client.ts`: instância única do Axios.
-- `src/api/routes.ts`: mapa centralizado das rotas.
-- `src/types/api.ts`: contratos de request/response.
-- `src/services/api/`: serviços responsáveis pelas chamadas HTTP.
-- `src/hooks/`: próxima camada a consumir esses serviços por TanStack Query.
-- `src/screens/`: camada de apresentação.
+## Autenticação
 
-## Rotas esperadas
+- Tutor: `GET /api/Tutor/login?email={email}&senha={senha}`
+- Médico veterinário: `GET /api/Medico/login?email={email}&senha={senha}`
+- Cadastro de tutor: `POST /api/Tutor`
+- Cadastro de médico: `POST /api/Medico`
 
-Autenticação:
+O aplicativo tenta os dois endpoints de login porque a documentação não informa um endpoint único para descobrir o perfil antes da autenticação.
 
-- `POST /auth/login`
-- `POST /auth/register`
-- `GET /auth/me`
+## Recursos utilizados pelo app
 
-Usuário:
+- Pets: `/api/Pet`
+- Prontuários: `/api/Prontuario`
+- Exames: `/api/Exame`
+- Histórico: `/api/Historico`
+- Receitas: `/api/Receita`
+- Relatórios: `/api/Relatorio`
+- Protocolos: `/api/Protocolo`
+- Tutores: `/api/Tutor`
+- Médicos: `/api/Medico`
+- Clínicas: `/api/Clinica`
 
-- `GET /users/me`
+Os métodos suportados por cada recurso estão documentados em `README_SPRINT3_ROUTES.md`.
 
-Pets:
+## Arquitetura
 
-- `GET /pets`
-- `GET /pets/:id`
-- `POST /pets`
-- `PUT /pets/:id`
-- `DELETE /pets/:id`
+```text
+Screen
+  ↓
+Hook
+  ↓
+Service API
+  ↓
+Axios
+  ↓
+Backend .NET
+```
 
-Registros clínicos:
-
-- `GET /clinical-records`
-- `GET /clinical-records/:id`
-- `POST /clinical-records`
-- `PUT /clinical-records/:id`
-- `DELETE /clinical-records/:id`
-
-> As rotas de domínio são um esquema inicial. Quando o backend fornecer o contrato oficial, os caminhos e os DTOs devem ser conferidos antes da integração final.
-
-## Regra importante
-
-Nenhuma tela deve chamar Axios diretamente. As telas deverão consumir hooks, e os hooks deverão consumir os serviços da API através do TanStack Query.
+As telas não fazem chamadas HTTP diretamente.

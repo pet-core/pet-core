@@ -5,7 +5,7 @@ import type { RegistroClinico } from "../types/models";
 
 export function useAvisos() {
     const { usuario } = useAuth();
-    const registrosQuery = useClinicalRecords();
+    const registrosQuery = useClinicalRecords("protocolo");
     const [cardAberto, setCardAberto] = useState<string | null>(null);
 
     const avisos = useMemo<RegistroClinico[]>(() => {

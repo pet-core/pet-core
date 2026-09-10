@@ -27,11 +27,11 @@ export function useProntuario() {
     const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
     const [mensagem, setMensagem] = useState("");
 
-    const registrosQuery = useClinicalRecords();
+    const registrosQuery = useClinicalRecords("prontuario");
     const petsQuery = usePets();
-    const criarRegistro = useCriarClinicalRecord();
-    const atualizarRegistro = useAtualizarClinicalRecord();
-    const excluirRegistro = useExcluirClinicalRecord();
+    const criarRegistro = useCriarClinicalRecord("prontuario");
+    const atualizarRegistro = useAtualizarClinicalRecord("prontuario");
+    const excluirRegistro = useExcluirClinicalRecord("prontuario");
 
     const registros = useMemo(() => registrosQuery.data ?? [], [registrosQuery.data]);
     const pets = useMemo(() => petsQuery.data ?? [], [petsQuery.data]);

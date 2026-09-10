@@ -5,9 +5,15 @@ export interface LoginRequest {
     senha: string;
 }
 
+/** O backend oficial não documenta um token JWT; aceita-se token apenas se ele vier na resposta. */
 export interface LoginResponse {
-    token: string;
-    usuario: Usuario;
+    token?: string;
+    usuario?: Usuario;
+    id?: string;
+    nome?: string;
+    email?: string;
+    tipoPerfil?: TipoPerfil;
+    [campo: string]: unknown;
 }
 
 export interface CadastroRequest {
@@ -27,7 +33,12 @@ export interface CadastroRequest {
 }
 
 export interface CadastroResponse {
-    usuario: Usuario;
+    usuario?: Usuario;
+    id?: string;
+    nome?: string;
+    email?: string;
+    tipoPerfil?: TipoPerfil;
+    [campo: string]: unknown;
 }
 
 export interface ApiListResponse<T> {

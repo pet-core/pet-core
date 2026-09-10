@@ -1,18 +1,18 @@
-# Sprint 3 — Perfil do veterinário via API
+# Perfil
 
-A tela **Alterar dados** do veterinário foi migrada para a camada HTTP da aplicação.
+O perfil é carregado pelo ID do usuário autenticado:
 
-## O que mudou
+- Tutor: `GET /api/Tutor/{id}`
+- Médico: `GET /api/Medico/{id}`
 
-- Perfil atual: `GET /users/me`.
-- Atualização: `PATCH /users/me`.
-- Especializações: `GET /catalogos/especializacoes`.
-- Clínicas: `GET /catalogos/clinicas`.
-- Consultas e atualização usam TanStack Query.
-- O token da sessão é aplicado automaticamente pelo cliente Axios.
-- A sessão persistida é sincronizada após uma atualização bem-sucedida.
-- A tela não importa mais `mockData`.
+Atualização:
 
-## Contrato esperado
+- Tutor: `PUT /api/Tutor/{id}/patch`
+- Médico: `PUT /api/Medico/{id}/patch`
 
-Os endpoints de catálogo são contratos esquemáticos até a disponibilização do backend definitivo. A aplicação mantém os caminhos centralizados em `src/api/routes.ts` para permitir a troca sem colocar URLs diretamente nas telas.
+As alterações atualizam o cache do TanStack Query e sincronizam a sessão do usuário.
+
+Os catálogos usados no cadastro são derivados das APIs oficiais:
+
+- Clínicas: `GET /api/Clinica`
+- Especializações: derivadas de `GET /api/Medico`, quando o campo de especialização estiver disponível.

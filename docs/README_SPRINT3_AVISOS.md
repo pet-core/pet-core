@@ -1,17 +1,5 @@
-# Sprint 3 — Avisos via API
+# Avisos
 
-A funcionalidade de Avisos do tutor foi migrada para a camada HTTP da aplicação.
+A documentação do backend não possui um recurso `/api/Aviso`.
 
-## Fluxo
-
-- A tela consulta `GET /clinical-records` através do Axios e TanStack Query.
-- São exibidos somente registros com `tipoRegistro = protocolo` pertencentes ao tutor autenticado.
-- A lista é atualizada com pull-to-refresh e pelo cache do TanStack Query.
-- O envio de protocolos pelo veterinário agora grava `tipoRegistro = protocolo`, permitindo que o backend e o cliente diferenciem esse registro de exames, receitas e outros documentos.
-- `AsyncStorage`, `storage.ts` e `mockData` não são utilizados pela tela de Avisos.
-
-## Contrato esperado
-
-`GET /clinical-records`
-
-Os registros de protocolo devem possuir, no mínimo, `id`, `tutorId`, `petId`, `petNome`, `tutorNome`, `veterinarioNome`, `tipoRegistro`, `titulo`, `texto` e `dataEnvio`.
+Por isso, a tela utiliza os dados disponíveis em `/api/Protocolo`, sem criar um endpoint fictício. O comportamento final de avisos direcionados ao tutor depende do contrato de resposta do backend para Protocolo.

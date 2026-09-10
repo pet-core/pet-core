@@ -27,9 +27,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = useCallback(async (email: string, senha: string) => {
         const response = await loginApi({ email: email.trim(), senha });
-        const usuario = { ...response.usuario };
-        delete usuario.senha;
-        const nextSession: AuthSession = { token: response.token, usuario };
+        if (!response.usuario) {
+            throw new Error("Resposta de login sem dados do usuário.");
+        }
+        const usuario = { ...response.usuario } as Omit<typeof response.usuario, "senha">;
+        delete (usuario as { senha?: string }).senha;
+        const nextSession: AuthSession = { token: response.token ?? "", usuario };
         await salvarSessao(nextSession);
         setSession(nextSession);
         return nextSession;

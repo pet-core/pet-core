@@ -15,8 +15,8 @@ export function useRelatorios() {
     const [modalPet, setModalPet] = useState(false);
 
     const petsQuery = usePets(tutorSelecionado?.id);
-    const registrosQuery = useClinicalRecords();
-    const criarRelatorio = useCriarClinicalRecord();
+    const registrosQuery = useClinicalRecords("prontuario");
+    const criarRelatorio = useCriarClinicalRecord("relatorio");
 
     const tutores = tutoresQuery.data ?? [];
     const petsDoTutor = petsQuery.data ?? [];

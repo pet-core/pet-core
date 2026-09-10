@@ -1,92 +1,71 @@
-import { useState, useEffect } from "react";
-import { getUsuarioLogado, atualizarUsuario } from "../services/authStorage";
-import type { Usuario, Clinica } from "../types/models";
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useAtualizarMeuUsuario, useClinicas, useEspecializacoes, useMeuUsuario } from "./api";
+import type { Clinica } from "../types/models";
 
 export function useVetAlterarDados() {
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
+    const { usuario: usuarioSessao, sincronizarUsuario } = useAuth();
+    const { data: usuarioApi, isLoading: carregandoUsuario, isError: erroUsuario, refetch: recarregarUsuario } = useMeuUsuario();
+    const { data: especializacoes = [], isLoading: carregandoEspecializacoes, isError: erroEspecializacoes } = useEspecializacoes();
+    const { data: clinicas = [], isLoading: carregandoClinicas, isError: erroClinicas } = useClinicas();
+    const atualizarMutation = useAtualizarMeuUsuario();
 
+    const usuario = usuarioApi ?? usuarioSessao;
     const [nome, setNome] = useState("");
-
     const [especializacao, setEspecializacao] = useState("");
-
     const [clinica, setClinica] = useState("");
-
     const [cnpj, setCnpj] = useState("");
-
     const [cep, setCep] = useState("");
-
     const [complemento, setComplemento] = useState("");
-
     const [mensagem, setMensagem] = useState("");
-
     const [modalEspecializacao, setModalEspecializacao] = useState(false);
-
     const [modalClinica, setModalClinica] = useState(false);
 
     useEffect(() => {
-            buscarUsuario();
-        }, []);
-
-    async function buscarUsuario() {
-        const user = await getUsuarioLogado();
-
-        if (user !== null) {
-            setUsuario(user);
-            setNome(user.nome || "");
-            setEspecializacao(user.especializacao || "");
-            setClinica(user.clinica || user.nomeClinica || "");
-            setCnpj(user.cnpj || "");
-            setCep(user.cep || "");
-            setComplemento(user.complemento || "");
-        }
-    }
+        if (!usuario) return;
+        setNome(usuario.nome || "");
+        setEspecializacao(usuario.especializacao || "");
+        setClinica(usuario.clinica || usuario.nomeClinica || "");
+        setCnpj(usuario.cnpj || "");
+        setCep(usuario.cep || "");
+        setComplemento(usuario.complemento || "");
+    }, [usuario]);
 
     function selecionarClinica(item: Clinica) {
-            setClinica(item.nome);
-            setCnpj(item.cnpj);
-            setCep(item.cep);
-            setComplemento(item.complemento);
-            setModalClinica(false);
-        }
+        setClinica(item.nome);
+        setCnpj(item.cnpj);
+        setCep(item.cep);
+        setComplemento(item.complemento);
+        setModalClinica(false);
+    }
 
     async function salvar() {
-        if (!nome || nome.trim() === "") {
-            setMensagem("Informe o nome.");
-            return;
-        }
-        if (!especializacao || especializacao.trim() === "") {
-            setMensagem("Informe a especialização.");
-            return;
-        }
-        if (!clinica || clinica.trim() === "") {
-            setMensagem("Informe a clínica.");
-            return;
-        }
+        if (!nome.trim()) return setMensagem("Informe o nome.");
+        if (!especializacao.trim()) return setMensagem("Informe a especialização.");
+        if (!clinica.trim()) return setMensagem("Informe a clínica.");
+        if (!usuario) return setMensagem("Usuário não encontrado.");
 
-        if (!usuario) {
-            setMensagem("Usuário não encontrado.");
-            return;
+        try {
+            const dados = {
+                nome: nome.trim(),
+                especializacao: especializacao.trim(),
+                clinica: clinica.trim(),
+                nomeClinica: clinica.trim(),
+                cnpj: cnpj.trim(),
+                cep: cep.trim(),
+                complemento: complemento.trim(),
+            };
+            const atualizado = await atualizarMutation.mutateAsync(dados);
+            await sincronizarUsuario(atualizado);
+            setMensagem("Dados atualizados com sucesso.");
+            return atualizado;
+        } catch (error) {
+            setMensagem(error instanceof Error ? error.message : "Não foi possível atualizar os dados.");
         }
-
-        const usuarioAtualizado: Usuario = {
-            ...usuario,
-            nome,
-            especializacao,
-            clinica,
-            nomeClinica: clinica,
-            cnpj,
-            cep,
-            complemento,
-        };
-
-        await atualizarUsuario(usuarioAtualizado);
-        setUsuario(usuarioAtualizado);
-        setMensagem("Dados atualizados com sucesso.");
     }
 
     return {
         usuario,
-        setUsuario,
         nome,
         setNome,
         especializacao,
@@ -105,7 +84,13 @@ export function useVetAlterarDados() {
         setModalEspecializacao,
         modalClinica,
         setModalClinica,
-        buscarUsuario,
+        especializacoes,
+        clinicas,
+        carregando: carregandoUsuario || carregandoEspecializacoes || carregandoClinicas,
+        salvando: atualizarMutation.isPending,
+        erroCatalogos: erroEspecializacoes || erroClinicas,
+        erroUsuario,
+        buscarUsuario: recarregarUsuario,
         selecionarClinica,
         salvar,
     };

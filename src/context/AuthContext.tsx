@@ -11,6 +11,7 @@ interface AuthContextValue {
     autenticado: boolean;
     login: (email: string, senha: string) => Promise<AuthSession>;
     logout: () => Promise<void>;
+    sincronizarUsuario: (usuario: AuthSession["usuario"]) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -40,6 +41,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(null);
     }, []);
 
+    const sincronizarUsuario = useCallback(async (usuario: AuthSession["usuario"]) => {
+        if (!session) {
+            throw new Error("Sessão não encontrada.");
+        }
+        const nextSession: AuthSession = { token: session.token, usuario };
+        await salvarSessao(nextSession);
+        setSession(nextSession);
+    }, [session]);
+
     const value = useMemo<AuthContextValue>(() => ({
         session,
         usuario: session?.usuario ?? null,
@@ -48,7 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         autenticado: session !== null,
         login,
         logout,
-    }), [session, carregando, login, logout]);
+        sincronizarUsuario,
+    }), [session, carregando, login, logout, sincronizarUsuario]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

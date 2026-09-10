@@ -1,10 +1,9 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Modal, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { especializacoes, clinicas } from "../../data/mockData";
 import { useVetAlterarDados } from "../../hooks/useVetAlterarDados";
 import { useAppNavigation } from "../../types";
 export default function AlterarDados() {
-    const { usuario, setUsuario, nome, setNome, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, cep, setCep, complemento, setComplemento, mensagem, setMensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, buscarUsuario, selecionarClinica, salvar } = useVetAlterarDados();
+    const { nome, setNome, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, cep, setCep, complemento, setComplemento, mensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, especializacoes, clinicas, carregando, salvando, erroCatalogos, buscarUsuario, selecionarClinica, salvar } = useVetAlterarDados();
 
     const navigation = useAppNavigation();
 
@@ -13,7 +12,7 @@ export default function AlterarDados() {
                 <Image source={require("../../../assets/avatar-default.png")} style={styles.avatar}/>
                 <Text style={styles.titulo}>Alterar dados</Text>
     
-                {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
+                {(mensagem !== "" || erroCatalogos) && <Text style={styles.mensagem}>{mensagem || "Não foi possível carregar os dados de clínicas e especializações."}</Text>}
     
                 <TextInput placeholder="Nome" style={styles.input} value={nome} onChangeText={setNome}/>
     
@@ -35,8 +34,8 @@ export default function AlterarDados() {
                 <TextInput placeholder="CEP da clínica" style={styles.input} value={cep} onChangeText={setCep}/>
                 <TextInput placeholder="Complemento" style={styles.input} onChangeText={setComplemento}/>
     
-                <TouchableOpacity style={styles.btn} onPress={salvar}>
-                    <Text style={styles.textoBtn}>Salvar</Text>
+                <TouchableOpacity style={styles.btn} onPress={salvar} disabled={carregando || salvando}>
+                    <Text style={styles.textoBtn}>{salvando ? "Salvando..." : carregando ? "Carregando..." : "Salvar"}</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.replace("VetHome")}>

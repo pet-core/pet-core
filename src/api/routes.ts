@@ -27,4 +27,8 @@ export const API_ROUTES = {
         list: "/protocolos",
         detail: (id: string) => `/protocolos/${id}`,
     },
+    catalogos: {
+        especializacoes: "/catalogos/especializacoes",
+        clinicas: "/catalogos/clinicas",
+    },
 } as const;

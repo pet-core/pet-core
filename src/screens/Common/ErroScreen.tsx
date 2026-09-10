@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useAppNavigation } from "../../types";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function ErroScreen() {
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
         <View style={styles.container}>

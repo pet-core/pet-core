@@ -1,6 +1,16 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
-export default function PetCard({ pet, onPress }) {
+interface PetCardProps {
+    pet: {
+        nome: string;
+        sexo: string;
+        idade?: string;
+        imagem?: string;
+    };
+    onPress: () => void;
+}
+
+export default function PetCard({ pet, onPress }: PetCardProps) {
     return (
         <TouchableOpacity style={styles.card} onPress={onPress}>
             <Image source={{ uri: pet.imagem }} style={styles.image}/>

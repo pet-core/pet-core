@@ -1,30 +1,26 @@
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
-import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { useTutorExames } from "../../hooks/useTutorExames";
-export default function Exames(props) {
-    const { exames, setExames, cardAberto, setCardAberto, buscarExames, abrirCard } = useTutorExames();
+import { Ionicons } from "@expo/vector-icons";
+import { useAvisos } from "../../hooks/useAvisos";
+import { useAppNavigation } from "../../types";
+export default function Avisos() {
+    const { avisos, setAvisos, cardAberto, setCardAberto, buscarAvisos, abrirCard } = useAvisos();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>
-                <MaterialCommunityIcons name="test-tube" size={50} color="#7167F6" alignSelf= "center"/>
-                <Text style={styles.titulo}>Exames</Text>
+                <Ionicons name="notifications-outline" size={50} color="#7167F6" alignSelf= "center"/>
+                <Text style={styles.titulo}>Avisos</Text>
     
-                <FlatList data={exames} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>Nenhum exame recebido.</Text>} renderItem={({ item }) => (
+                <FlatList data={avisos} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>Nenhum aviso recebido.</Text>} renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} onPress={() => abrirCard(item.id)}>
-                        <Text style={styles.cardTitulo}>{item.tipoExame}</Text>
-                        <Text style={styles.cardSubtitulo}>Solicitado por: {item.veterinarioNome}</Text>
+                        <Text style={styles.cardTitulo}>{item.titulo}</Text>
                         <Text style={styles.cardSubtitulo}>Pet: {item.petNome}</Text>
-    
+                        <Text style={styles.cardSubtitulo}>Enviado por: {item.veterinarioNome}</Text>
+                        <Text style={styles.cardSubtitulo}>Data: {item.dataEnvio}</Text>
                         {cardAberto === item.id && (
-                            <View style={styles.areaDocumento}>
-                                <Text style={styles.label}>Documento de solicitação:</Text>
-                                <TouchableOpacity style={styles.linkArea} onPress={() => navigation.navigate("Erro")}>
-                                    <Ionicons name="document-text-outline" size={18} color="#7167F6"/>
-                                    <Text style={styles.link}>{item.arquivoSolicitacao}</Text>
-                                </TouchableOpacity>
+                            <View style={styles.areaTexto}>
+                                <Text style={styles.texto}>{item.texto}</Text>
                             </View>
                         )}
                     </TouchableOpacity>
@@ -50,7 +46,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: "center",
     },
-
+    
     vazio: {
         color: "#666",
         fontSize: 16,
@@ -77,28 +73,17 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
 
-    areaDocumento: {
+    areaTexto: {
         marginTop: 14,
         borderTopWidth: 1,
         borderTopColor: "#ccc",
         paddingTop: 12,
     },
 
-    label: {
-        color: "#666",
-        marginBottom: 4,
-    },
-
-    linkArea: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-    },
-
-    link: {
-        color: "#7167F6",
-        textDecorationLine: "underline",
-        fontWeight: "bold",
+    texto: {
+        fontSize: 15,
+        color: "#222",
+        lineHeight: 22,
     },
 
     btnVoltar: {

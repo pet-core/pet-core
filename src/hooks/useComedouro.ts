@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Pet } from "../types/models";
 
 export function useComedouro() {
-    const navigation = useNavigation();
+    const [pets, setPets] = useState<Pet[]>([]);
 
-    const [pets, setPets] = useState([]);
-
-    const [petAberto, setPetAberto] = useState(null);
+    const [petAberto, setPetAberto] = useState<string | null>(null);
 
     const [mensagem, setMensagem] = useState("");
 
@@ -20,18 +18,18 @@ export function useComedouro() {
             const petsStorage = await AsyncStorage.getItem("PETS");
     
             if (usuarioStorage !== null && petsStorage !== null) {
-                const usuario = JSON.parse(usuarioStorage);
-                const todosPets = JSON.parse(petsStorage);
+                const usuario: Usuario = JSON.parse(usuarioStorage);
+                const todosPets: Pet[] = JSON.parse(petsStorage);
                 setPets(todosPets.filter((pet) => pet.tutorId === usuario.id));
             }
         }
 
-    function abrirPet(id) {
+    function abrirPet(id: string) {
             setPetAberto(petAberto === id ? null : id);
             setMensagem("");
         }
 
-    async function encherComedouro(petId) {
+    async function encherComedouro(petId: string) {
             const petAtual = pets.find((pet) => pet.id === petId);
     
             if (petAtual && petAtual.comedouroStatus === "cheio") {
@@ -40,7 +38,7 @@ export function useComedouro() {
             }
     
             const petsStorage = await AsyncStorage.getItem("PETS");
-            let todosPets = petsStorage ? JSON.parse(petsStorage) : [];
+            let todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
     
             todosPets = todosPets.map((pet) => {
                 if (pet.id === petId) {

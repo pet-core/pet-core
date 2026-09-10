@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useAdicionarPet } from "../../hooks/useAdicionarPet";
-export default function AdicionarPet(props) {
+import { useAppNavigation } from "../../types";
+export default function AdicionarPet() {
     const { usuario, setUsuario, nome, setNome, nascimento, setNascimento, raca, setRaca, especie, setEspecie, porte, setPorte, pelagem, setPelagem, sexo, setSexo, mensagem, setMensagem, tipoMensagem, setTipoMensagem, buscarUsuario, mostrarMensagem, formatarData, salvarPet } = useAdicionarPet();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <ScrollView contentContainerStyle={styles.container}>

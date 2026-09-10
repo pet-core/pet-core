@@ -55,5 +55,5 @@ export interface RegistroClinico {
     tutorNome: string;
     petId: string;
     petNome: string;
-    [campo: string]: unknown;
+    [campo: string]: string;
 }

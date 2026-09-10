@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useTutorMenu } from "../../hooks/useTutorMenu";
-export default function Menu(props) {
+import { useAppNavigation } from "../../types";
+export default function Menu() {
     const { alterarFoto, sair } = useTutorMenu();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>

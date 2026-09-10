@@ -2,12 +2,12 @@ import { StyleSheet, Text, View, TouchableOpacity, FlatList } from "react-native
 import { Ionicons, MaterialCommunityIcons, FontAwesome6 } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { useNavigation } from "@react-navigation/native";
 import { useTutorHome } from "../../hooks/useTutorHome";
-export default function Home(props) {
+import { useAppNavigation } from "../../types";
+export default function Home() {
     const { usuario, setUsuario, pets, setPets, buscarDados, abrirPet } = useTutorHome();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>

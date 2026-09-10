@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Pet } from "../types/models";
 
 export function useAdicionarPet() {
-    const navigation = useNavigation();
-
-    const [usuario, setUsuario] = useState(null);
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
     const [nome, setNome] = useState("");
 
@@ -34,12 +32,12 @@ export function useAdicionarPet() {
             if (dados !== null) setUsuario(JSON.parse(dados));
         }
 
-    function mostrarMensagem(tipo, texto) {
+    function mostrarMensagem(tipo: string, texto: string) {
             setTipoMensagem(tipo);
             setMensagem(texto);
         }
 
-    function formatarData(texto) {
+    function formatarData(texto: string) {
             let numeros = texto.replace(/\D/g, "");
             if (numeros.length > 8) numeros = numeros.slice(0, 8);
             if (numeros.length > 4) return `${numeros.slice(0, 2)}/${numeros.slice(2, 4)}/${numeros.slice(4)}`;
@@ -58,13 +56,14 @@ export function useAdicionarPet() {
                 return;
             }
     
-            let pets = [];
+            let pets: Pet[] = [];
     
-            if (await AsyncStorage.getItem("PETS") !== null) {
-                pets = JSON.parse(await AsyncStorage.getItem("PETS"));
+            const petsStorage = await AsyncStorage.getItem("PETS");
+            if (petsStorage !== null) {
+                pets = JSON.parse(petsStorage);
             }
     
-            const novoPet = {
+            const novoPet: Pet = {
                 id: `PET${Date.now()}`,
                 tutorId: usuario.id,
                 nome,

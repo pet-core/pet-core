@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Modal } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useHistorico } from "../../hooks/useHistorico";
-export default function Historico(props) {
+import { useAppNavigation } from "../../types";
+export default function Historico() {
     const { usuario, setUsuario, pets, setPets, petSelecionado, setPetSelecionado, historicos, setHistoricos, mensagem, setMensagem, cardAberto, setCardAberto, modalPet, setModalPet, buscarDados, selecionarPet, solicitarHistorico, abrirCard } = useHistorico();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>

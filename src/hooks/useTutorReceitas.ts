@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, RegistroClinico } from "../types/models";
 
 export function useTutorReceitas() {
-    const navigation = useNavigation();
+    const [receitas, setReceitas] = useState<RegistroClinico[]>([]);
 
-    const [receitas, setReceitas] = useState([]);
-
-    const [cardAberto, setCardAberto] = useState(null);
+    const [cardAberto, setCardAberto] = useState<string | null>(null);
 
     useEffect(() => {
             buscarReceitas();
@@ -18,13 +16,13 @@ export function useTutorReceitas() {
             const receitasStorage = await AsyncStorage.getItem("RECEITAS_ENVIADAS");
     
             if (usuarioStorage !== null) {
-                const usuario = JSON.parse(usuarioStorage);
-                const listaReceitas = receitasStorage ? JSON.parse(receitasStorage) : [];
+                const usuario: Usuario = JSON.parse(usuarioStorage);
+                const listaReceitas: RegistroClinico[] = receitasStorage ? JSON.parse(receitasStorage) : [];
                 setReceitas(listaReceitas.filter((item) => item.tutorId === usuario.id));
             }
         }
 
-    function abrirCard(id) {
+    function abrirCard(id: string) {
             setCardAberto(cardAberto === id ? null : id);
         }
 

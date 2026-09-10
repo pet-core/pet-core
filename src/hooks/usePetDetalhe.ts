@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute, type RouteProp } from "@react-navigation/native";
+import type { RootStackParamList } from "../types/navigation";
+import type { Pet } from "../types/models";
 
 export function usePetDetalhe() {
-    const navigation = useNavigation();
-
-    const route = useRoute();
+    const route = useRoute<RouteProp<RootStackParamList, "TutorPetDetalhe">>();
 
     const { petId } = route.params;
 
-    const [pet, setPet] = useState(null);
+    const [pet, setPet] = useState<Pet | null>(null);
 
     useEffect(() => {
             buscarPet();
@@ -19,18 +19,18 @@ export function usePetDetalhe() {
             const petsStorage = await AsyncStorage.getItem("PETS");
     
             if (petsStorage !== null) {
-                const pets = JSON.parse(petsStorage);
+                const pets: Pet[] = JSON.parse(petsStorage);
                 const petEncontrado = pets.find((item) => item.id === petId);
-                setPet(petEncontrado);
+                setPet(petEncontrado ?? null);
             }
         }
 
     async function alterarObito() {
             const petsStorage = await AsyncStorage.getItem("PETS");
-            let pets = petsStorage ? JSON.parse(petsStorage) : [];
+            let pets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
     
             const petsAtualizados = pets.map((item) => {
-                if (item.id === pet.id) {
+                if (item.id === pet?.id) {
                     return { ...item, obitoInformado: !item.obitoInformado };
                 }
                 return item;
@@ -38,8 +38,8 @@ export function usePetDetalhe() {
     
             await AsyncStorage.setItem("PETS", JSON.stringify(petsAtualizados));
     
-            const petAtualizado = petsAtualizados.find((item) => item.id === pet.id);
-            setPet(petAtualizado);
+            const petAtualizado = petsAtualizados.find((item) => item.id === pet?.id);
+            setPet(petAtualizado ?? null);
         }
 
     return {

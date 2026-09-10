@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useAppNavigation } from "../types";
+import type { Usuario, Pet } from "../types/models";
 
 export function useTutorHome() {
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
-    const [usuario, setUsuario] = useState(null);
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-    const [pets, setPets] = useState([]);
+    const [pets, setPets] = useState<Pet[]>([]);
 
     useEffect(() => {
             buscarDados();
@@ -20,12 +21,12 @@ export function useTutorHome() {
             if (usuarioStorage !== null) {
                 const user = JSON.parse(usuarioStorage);
                 setUsuario(user);
-                const todosPets = petsStorage ? JSON.parse(petsStorage) : [];
+                const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
                 setPets(todosPets.filter((pet) => pet.tutorId === user.id));
             }
         }
 
-    function abrirPet(pet) {
+    function abrirPet(pet: Pet) {
             navigation.navigate("TutorPetDetalhe", { petId: pet.id });
         }
 

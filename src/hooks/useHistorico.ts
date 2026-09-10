@@ -1,21 +1,19 @@
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Pet, RegistroClinico } from "../types/models";
 
 export function useHistorico() {
-    const navigation = useNavigation();
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-    const [usuario, setUsuario] = useState(null);
+    const [pets, setPets] = useState<Pet[]>([]);
 
-    const [pets, setPets] = useState([]);
+    const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
 
-    const [petSelecionado, setPetSelecionado] = useState(null);
-
-    const [historicos, setHistoricos] = useState([]);
+    const [historicos, setHistoricos] = useState<RegistroClinico[]>([]);
 
     const [mensagem, setMensagem] = useState("");
 
-    const [cardAberto, setCardAberto] = useState(null);
+    const [cardAberto, setCardAberto] = useState<string | null>(null);
 
     const [modalPet, setModalPet] = useState(false);
 
@@ -29,18 +27,18 @@ export function useHistorico() {
             const historicosStorage = await AsyncStorage.getItem("HISTORICOS_ENVIADOS");
     
             if (usuarioStorage !== null) {
-                const user = JSON.parse(usuarioStorage);
+                const user: Usuario = JSON.parse(usuarioStorage);
                 setUsuario(user);
     
-                const todosPets = petsStorage ? JSON.parse(petsStorage) : [];
+                const todosPets: Pet[] = petsStorage ? JSON.parse(petsStorage) : [];
                 setPets(todosPets.filter((pet) => pet.tutorId === user.id));
     
-                const listaHistoricos = historicosStorage ? JSON.parse(historicosStorage) : [];
+                const listaHistoricos: RegistroClinico[] = historicosStorage ? JSON.parse(historicosStorage) : [];
                 setHistoricos(listaHistoricos.filter((item) => item.tutorId === user.id));
             }
         }
 
-    function selecionarPet(item) {
+    function selecionarPet(item: Pet) {
             setPetSelecionado(item);
             setMensagem("");
             setModalPet(false);
@@ -53,12 +51,12 @@ export function useHistorico() {
             }
     
             const storage = await AsyncStorage.getItem("SOLICITACOES_HISTORICO");
-            let solicitacoes = storage ? JSON.parse(storage) : [];
+            let solicitacoes: RegistroClinico[] = storage ? JSON.parse(storage) : [];
     
-            const novaSolicitacao = {
+            const novaSolicitacao: RegistroClinico = {
                 id: `${Date.now()}`,
-                tutorId: usuario.id,
-                tutorNome: usuario.nome,
+                tutorId: usuario!.id,
+                tutorNome: usuario!.nome,
                 petId: petSelecionado.id,
                 petNome: petSelecionado.nome,
                 status: "Solicitado",
@@ -70,7 +68,7 @@ export function useHistorico() {
             setMensagem("Solicitação de histórico enviada com sucesso.");
         }
 
-    function abrirCard(id) {
+    function abrirCard(id: string) {
             setCardAberto(cardAberto === id ? null : id);
         }
 

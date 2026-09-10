@@ -1,10 +1,10 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, ScrollView, View, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useTutorAlterarDados } from "../../hooks/useTutorAlterarDados";
-export default function AlterarDados(props) {
+import { useAppNavigation } from "../../types";
+export default function AlterarDados() {
     const { usuario, setUsuario, nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, confirmarSenha, setConfirmarSenha, mensagem, setMensagem, buscarUsuario, formatarData, formatarTelefone, salvar } = useTutorAlterarDados();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <ScrollView contentContainerStyle={styles.container}>

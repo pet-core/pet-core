@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useTutorReceitas } from "../../hooks/useTutorReceitas";
-export default function Receitas(props) {
+import { useAppNavigation } from "../../types";
+export default function Receitas() {
     const { receitas, setReceitas, cardAberto, setCardAberto, buscarReceitas, abrirCard } = useTutorReceitas();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>

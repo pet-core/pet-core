@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { usePetDetalhe } from "../../hooks/usePetDetalhe";
-export default function PetDetalhe(props) {
+import { useAppNavigation } from "../../types";
+export default function PetDetalhe() {
     const { pet, setPet, buscarPet, alterarObito } = usePetDetalhe();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     if (!pet) {
             return (

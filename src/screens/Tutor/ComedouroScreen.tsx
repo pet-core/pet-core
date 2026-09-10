@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
 import { FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useComedouro } from "../../hooks/useComedouro";
-export default function Comedouro(props) {
+import { useAppNavigation } from "../../types";
+export default function Comedouro() {
     const { pets, setPets, petAberto, setPetAberto, mensagem, setMensagem, buscarPets, abrirPet, encherComedouro } = useComedouro();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <View style={styles.container}>

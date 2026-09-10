@@ -1,37 +1,30 @@
-import { useState, useEffect } from "react";
-import type { RegistroClinico } from "../types/models";
-import { getUsuarioLogado } from "../services/authStorage";
-import { getClinicalRecords } from "../services/clinicalRecordService";
-import { KEYS } from "../services/storage";
+import { useMemo, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useReceitas } from "./api/useReceitas";
 
 export function useTutorReceitas() {
-    const [receitas, setReceitas] = useState<RegistroClinico[]>([]);
-
+    const { usuario } = useAuth();
+    const { data = [], isLoading, isError, error, refetch, isRefetching } = useReceitas();
     const [cardAberto, setCardAberto] = useState<string | null>(null);
 
-    useEffect(() => {
-            buscarReceitas();
-        }, []);
-
-    async function buscarReceitas() {
-        const usuario = await getUsuarioLogado();
-
-        if (usuario !== null) {
-            const lista = await getClinicalRecords(KEYS.RECEITAS_ENVIADAS);
-            setReceitas(lista.filter((item) => item.tutorId === usuario.id));
-        }
-    }
+    const receitas = useMemo(
+        () => data.filter((item) => item.tutorId === usuario?.id),
+        [data, usuario?.id],
+    );
 
     function abrirCard(id: string) {
-            setCardAberto(cardAberto === id ? null : id);
-        }
+        setCardAberto((atual) => (atual === id ? null : id));
+    }
 
     return {
         receitas,
-        setReceitas,
         cardAberto,
         setCardAberto,
-        buscarReceitas,
+        buscarReceitas: refetch,
         abrirCard,
+        isLoading,
+        isError,
+        error,
+        isRefetching,
     };
 }

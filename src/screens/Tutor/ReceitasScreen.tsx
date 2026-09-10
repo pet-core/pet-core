@@ -3,7 +3,7 @@ import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useTutorReceitas } from "../../hooks/useTutorReceitas";
 import { useAppNavigation } from "../../types";
 export default function Receitas() {
-    const { receitas, setReceitas, cardAberto, setCardAberto, buscarReceitas, abrirCard } = useTutorReceitas();
+    const { receitas, cardAberto, abrirCard, isLoading, isError, error, buscarReceitas, isRefetching } = useTutorReceitas();
 
     const navigation = useAppNavigation();
 
@@ -12,7 +12,10 @@ export default function Receitas() {
                 <MaterialCommunityIcons name="file-document-outline" size={50} color="#7167F6" alignSelf= "center"/>
                 <Text style={styles.titulo}>Receitas</Text>
     
-                <FlatList data={receitas} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>Nenhuma receita recebida.</Text>} renderItem={({ item }) => (
+                <FlatList
+                    refreshing={isRefetching}
+                    onRefresh={() => { void buscarReceitas(); }}
+                    data={receitas} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>{isLoading ? "Carregando receitas..." : isError ? (error?.message || "Não foi possível carregar as receitas.") : "Nenhuma receita recebida."}</Text>} renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} onPress={() => abrirCard(item.id)}>
                         <Text style={styles.cardTitulo}>Receita médica</Text>
                         <Text style={styles.cardSubtitulo}>Enviada por: {item.veterinarioNome}</Text>

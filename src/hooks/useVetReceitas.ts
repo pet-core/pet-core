@@ -1,117 +1,82 @@
-import { useState, useEffect } from "react";
-import { getUsuarioLogado } from "../services/authStorage";
-import { getTutores } from "../services/userService";
-import { getPetsByTutor } from "../services/petService";
-import { addClinicalRecord } from "../services/clinicalRecordService";
-import { KEYS } from "../services/storage";
-import type { Usuario, Pet, RegistroClinico } from "../types/models";
+import { useState } from "react";
+import type { Pet } from "../types/models";
+import type { Usuario } from "../types/models";
+
+type UsuarioSemSenha = Omit<Usuario, "senha">;
+import { useAuth } from "../context/AuthContext";
+import { useTutores } from "./api/useUsers";
+import { usePets } from "./api/usePets";
+import { useCriarReceita } from "./api/useReceitas";
 
 export function useVetReceitas() {
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
-
-    const [tutores, setTutores] = useState<Usuario[]>([]);
-
-    const [tutorSelecionado, setTutorSelecionado] = useState<Usuario | null>(null);
-
-    const [petsDoTutor, setPetsDoTutor] = useState<Pet[]>([]);
-
+    const { usuario } = useAuth();
+    const { data: tutores = [], isLoading: carregandoTutores } = useTutores();
+    const [tutorSelecionado, setTutorSelecionado] = useState<UsuarioSemSenha | null>(null);
     const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
-
     const [arquivoReceita, setArquivoReceita] = useState("");
-
     const [mensagem, setMensagem] = useState("");
-
     const [modalTutor, setModalTutor] = useState(false);
-
     const [modalPet, setModalPet] = useState(false);
 
-    useEffect(() => {
-            buscarDados();
-        }, []);
+    const { data: petsDoTutor = [], isLoading: carregandoPets } = usePets(tutorSelecionado?.id);
+    const criar = useCriarReceita();
 
-    async function buscarDados() {
-        const user = await getUsuarioLogado();
-        const tutoresDisponiveis = await getTutores();
-
-        if (user !== null) {
-            setUsuario(user);
-        }
-
-        setTutores(tutoresDisponiveis);
+    function selecionarTutor(item: UsuarioSemSenha) {
+        setTutorSelecionado(item);
+        setPetSelecionado(null);
+        setArquivoReceita("");
+        setMensagem("");
+        setModalTutor(false);
     }
-
-    async function buscarPetsDoTutor(tutorId: string) {
-        setPetsDoTutor(await getPetsByTutor(tutorId));
-    }
-
-    function selecionarTutor(item: Usuario) {
-            setTutorSelecionado(item);
-            setPetSelecionado(null);
-            setArquivoReceita("");
-            setMensagem("");
-            setModalTutor(false);
-            buscarPetsDoTutor(item.id);
-        }
 
     function selecionarPet(item: Pet) {
-            setPetSelecionado(item);
-            setArquivoReceita("");
-            setMensagem("");
-            setModalPet(false);
-        }
+        setPetSelecionado(item);
+        setArquivoReceita("");
+        setMensagem("");
+        setModalPet(false);
+    }
 
     function selecionarArquivo() {
-            if (!petSelecionado) {
-                setMensagem("Selecione o tutor e o pet primeiro.");
-                return;
-            }
-    
-            const petArquivo = petSelecionado.nome.toLowerCase().replaceAll(" ", "_");
-            setArquivoReceita(`receita_${petArquivo}_${Date.now()}.pdf`);
-            setMensagem("");
-        }
+        setMensagem("O backend ainda não disponibiliza upload de arquivos. Informe a referência do documento enviada pelo serviço de arquivos.");
+    }
 
-    async function enviarReceita() {
-        if (!tutorSelecionado || !petSelecionado || !arquivoReceita) {
-            setMensagem("Preencha todos os campos.");
+    function enviarReceita() {
+        if (!tutorSelecionado || !petSelecionado || !arquivoReceita.trim()) {
+            setMensagem("Preencha o tutor, o pet e a referência do documento.");
             return;
         }
-
         if (!usuario) {
-            setMensagem("Usuário não encontrado.");
+            setMensagem("Usuário autenticado não encontrado.");
             return;
         }
 
-        const novaReceita: RegistroClinico = {
-            id: `${Date.now()}`,
+        criar.mutate({
             tutorId: tutorSelecionado.id,
             tutorNome: tutorSelecionado.nome,
             petId: petSelecionado.id,
             petNome: petSelecionado.nome,
             veterinarioId: usuario.id,
             veterinarioNome: usuario.nome,
-            arquivoReceita,
-            dataEnvio: new Date().toLocaleDateString("pt-BR"),
-        };
-
-        await addClinicalRecord(KEYS.RECEITAS_ENVIADAS, novaReceita);
-
-        setMensagem("Receita enviada para o tutor.");
-        setTutorSelecionado(null);
-        setPetsDoTutor([]);
-        setPetSelecionado(null);
-        setArquivoReceita("");
+            arquivoReceita: arquivoReceita.trim(),
+            dataEnvio: new Date().toISOString(),
+            tipoRegistro: "receita",
+        }, {
+            onSuccess: () => {
+                setMensagem("Receita enviada para o tutor.");
+                setTutorSelecionado(null);
+                setPetSelecionado(null);
+                setArquivoReceita("");
+            },
+            onError: (err) => setMensagem(err.message || "Não foi possível enviar a receita."),
+        });
     }
 
     return {
         usuario,
-        setUsuario,
         tutores,
-        setTutores,
         tutorSelecionado,
         setTutorSelecionado,
         petsDoTutor,
-        setPetsDoTutor,
         petSelecionado,
         setPetSelecionado,
         arquivoReceita,
@@ -122,11 +87,12 @@ export function useVetReceitas() {
         setModalTutor,
         modalPet,
         setModalPet,
-        buscarDados,
-        buscarPetsDoTutor,
         selecionarTutor,
         selecionarPet,
         selecionarArquivo,
         enviarReceita,
+        carregandoTutores,
+        carregandoPets,
+        enviando: criar.isPending,
     };
 }

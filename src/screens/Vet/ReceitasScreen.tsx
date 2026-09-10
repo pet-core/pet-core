@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Modal, TextInput } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useVetReceitas } from "../../hooks/useVetReceitas";
 import { useAppNavigation } from "../../types";
 export default function Receitas() {
-    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, arquivoReceita, setArquivoReceita, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, buscarDados, buscarPetsDoTutor, selecionarTutor, selecionarPet, selecionarArquivo, enviarReceita } = useVetReceitas();
+    const { tutores, tutorSelecionado, petsDoTutor, petSelecionado, arquivoReceita, setArquivoReceita, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, selecionarTutor, selecionarPet, enviarReceita, carregandoTutores, carregandoPets, enviando } = useVetReceitas();
 
     const navigation = useAppNavigation();
 
@@ -34,14 +34,18 @@ export default function Receitas() {
                     </View>
                 )}
     
-                <TouchableOpacity style={styles.btnArquivo} onPress={selecionarArquivo}>
-                    <Ionicons name="document-attach-outline" size={20} color="#7167F6"/>
-                    <Text style={styles.textoBtnArquivo}>{arquivoReceita || "Selecionar arquivo da receita"}</Text>
-                </TouchableOpacity>
+                <TextInput
+                    style={styles.inputArquivo}
+                    value={arquivoReceita}
+                    onChangeText={setArquivoReceita}
+                    placeholder="Referência/URL do documento da receita"
+                    placeholderTextColor="#777"
+                    autoCapitalize="none"
+                />
     
-                <TouchableOpacity style={styles.btn} onPress={enviarReceita}>
+                <TouchableOpacity style={styles.btn} onPress={enviarReceita} disabled={enviando}>
                     <Ionicons name="send" size={18} color="#fff"/>
-                    <Text style={styles.textoBtn}>Enviar</Text>
+                    <Text style={styles.textoBtn}>{enviando ? "Enviando..." : "Enviar"}</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>
@@ -52,7 +56,7 @@ export default function Receitas() {
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalBox}>
                             <Text style={styles.modalTitulo}>Selecionar tutor</Text>
-                            {tutores.map((item) => (
+                            {carregandoTutores ? <Text style={styles.modalItemSubtexto}>Carregando tutores...</Text> : tutores.map((item) => (
                                 <TouchableOpacity key={item.id} style={styles.modalItem} onPress={() => selecionarTutor(item)}>
                                     <Text style={styles.modalItemTexto}>{item.nome}</Text>
                                     <Text style={styles.modalItemSubtexto}>{item.email}</Text>
@@ -69,12 +73,12 @@ export default function Receitas() {
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalBox}>
                             <Text style={styles.modalTitulo}>Selecionar pet</Text>
-                            {petsDoTutor.length === 0 && (
+                            {carregandoPets ? <Text style={styles.modalItemSubtexto}>Carregando pets...</Text> : petsDoTutor.length === 0 && (
                                 <Text style={styles.modalItemSubtexto}>
                                 Selecione um tutor com pets cadastrados.
                                 </Text>
                             )}
-                            {petsDoTutor.map((item) => (
+                            {!carregandoPets && petsDoTutor.map((item) => (
                                 <TouchableOpacity key={item.id} style={styles.modalItem} onPress={() => selecionarPet(item)}>
                                     <Text style={styles.modalItemTexto}>{item.nome}</Text>
                                     <Text style={styles.modalItemSubtexto}>
@@ -152,7 +156,7 @@ const styles = StyleSheet.create({
         color: "#333",
     },
 
-    btnArquivo: {
+    inputArquivo: {
         backgroundColor: "#f1f1f1",
         borderWidth: 1.5,
         borderColor: "#7167F6",
@@ -161,9 +165,6 @@ const styles = StyleSheet.create({
         padding: 12,
         justifyContent: "center",
         marginBottom: 12,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
     },
 
     textoBtnArquivo: {

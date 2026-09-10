@@ -13,7 +13,9 @@ export const KEYS = {
     HISTORICOS_ENVIADOS: "HISTORICOS_ENVIADOS",
     SOLICITACOES_HISTORICO: "SOLICITACOES_HISTORICO",
     PRONTUARIOS: "PRONTUARIOS",
-};
+} as const;
+
+export type StorageKey = (typeof KEYS)[keyof typeof KEYS];
 
 export async function initializeStorage() {
     const usuarios = await AsyncStorage.getItem(KEYS.USUARIOS);
@@ -27,15 +29,15 @@ export async function initializeStorage() {
     }
 }
 
-export async function getData(key) {
+export async function getData<T>(key: StorageKey): Promise<T | null> {
     const data = await AsyncStorage.getItem(key);
-    return data ? JSON.parse(data) : null;
+    return data ? (JSON.parse(data) as T) : null;
 }
 
-export async function setData(key, value) {
+export async function setData<T>(key: StorageKey, value: T): Promise<void> {
     await AsyncStorage.setItem(key, JSON.stringify(value));
 }
 
-export async function removeData(key) {
+export async function removeData(key: StorageKey): Promise<void> {
     await AsyncStorage.removeItem(key);
 }

@@ -1,4 +1,6 @@
-export const mockUsers = [
+import type { Usuario, Pet, Clinica, Protocolo } from "../types/models";
+
+export const mockUsers: Usuario[] = [
     {
         id: "1",
         nome: "Leonardo Campos",
@@ -47,7 +49,7 @@ export const mockUsers = [
     },
 ];
 
-export const mockPets = [
+export const mockPets: Pet[] = [
     {
         id: "PET1",
         tutorId: "1",
@@ -89,7 +91,7 @@ export const mockPets = [
     },
 ];
 
-export const especializacoes = [
+export const especializacoes: string[] = [
     "Clínica geral",
     "Dermatologia",
     "Cardiologia",
@@ -99,7 +101,7 @@ export const especializacoes = [
     "Endocrinologia",
 ];
 
-export const clinicas = [
+export const clinicas: Clinica[] = [
     {
         nome: "PetCore Clínica Veterinária",
         cnpj: "00.000.000/0001-00",
@@ -132,7 +134,7 @@ export const clinicas = [
     },
 ];
 
-export const examesDisponiveis = [
+export const examesDisponiveis: string[] = [
     "Hemograma completo",
     "Exame de urina",
     "Exame de fezes",
@@ -142,7 +144,7 @@ export const examesDisponiveis = [
     "Função hepática",
 ];
 
-export const protocolos = [
+export const protocolos: Protocolo[] = [
     {
         id: "PROTO1",
         titulo: "Preventivo contra picadas",

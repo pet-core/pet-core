@@ -1,8 +1,11 @@
 import { useState } from "react";
 import type { Clinica } from "../types/models";
 import { cadastrar as cadastrarApi } from "../services/api/authApiService";
+import { useClinicas, useEspecializacoes } from "./api";
 
 export function useCadastro() {
+    const especializacoesQuery = useEspecializacoes();
+    const clinicasQuery = useClinicas();
     const [nome, setNome] = useState("");
 
     const [nascimento, setNascimento] = useState("");
@@ -133,6 +136,9 @@ export function useCadastro() {
         }
     }
 
+    const especializacoes = especializacoesQuery.data ?? [];
+    const clinicas = clinicasQuery.data ?? [];
+
     return {
         nome,
         setNome,
@@ -170,10 +176,14 @@ export function useCadastro() {
         setModalClinica,
         mostrarMensagem,
         selecionarClinica,
+        especializacoes,
+        clinicas,
         limparClinicaSelecionada,
         formatarData,
         formatarTelefone,
         cadastrar,
-        carregando,
+        carregando: carregando || especializacoesQuery.isLoading || clinicasQuery.isLoading,
+        carregandoCatalogos: especializacoesQuery.isLoading || clinicasQuery.isLoading,
+        erroCatalogos: especializacoesQuery.isError || clinicasQuery.isError,
     };
 }

@@ -1,12 +1,11 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, ScrollView, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { especializacoes, clinicas } from "../../data/mockData";
 import Footer from "../../components/Footer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCadastro } from "../../hooks/useCadastro";
 import { useAppNavigation } from "../../types";
 export default function Cadastro() {
-    const { nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, isVeterinario, setIsVeterinario, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, nomeClinica, setNomeClinica, cep, setCep, complemento, setComplemento, mensagem, setMensagem, tipoMensagem, setTipoMensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, mostrarMensagem, selecionarClinica, limparClinicaSelecionada, formatarData, formatarTelefone, cadastrar, carregando } = useCadastro();
+    const { nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, isVeterinario, setIsVeterinario, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, nomeClinica, setNomeClinica, cep, setCep, complemento, setComplemento, mensagem, setMensagem, tipoMensagem, setTipoMensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, mostrarMensagem, selecionarClinica, limparClinicaSelecionada, formatarData, formatarTelefone, cadastrar, carregando, especializacoes, clinicas, carregandoCatalogos, erroCatalogos } = useCadastro();
 
     const navigation = useAppNavigation();
 
@@ -117,7 +116,11 @@ export default function Cadastro() {
                             <View style={styles.modalBox}>
                                 <Text style={styles.modalTitulo}>Especialização</Text>
     
-                                {especializacoes.map((item, index) => (
+                                {carregandoCatalogos ? (
+                                    <Text style={styles.modalItemTexto}>Carregando especializações...</Text>
+                                ) : erroCatalogos ? (
+                                    <Text style={styles.modalItemTexto}>Não foi possível carregar as especializações.</Text>
+                                ) : especializacoes.map((item, index) => (
                                     <TouchableOpacity key={index} style={styles.modalItem} onPress={() => {
                                         setEspecializacao(item);
                                         setModalEspecializacao(false);
@@ -137,7 +140,11 @@ export default function Cadastro() {
                             <View style={styles.modalBox}>
                                 <Text style={styles.modalTitulo}>Clínica</Text>
     
-                                {clinicas.map((item, index) => (
+                                {carregandoCatalogos ? (
+                                    <Text style={styles.modalItemTexto}>Carregando clínicas...</Text>
+                                ) : erroCatalogos ? (
+                                    <Text style={styles.modalItemTexto}>Não foi possível carregar as clínicas.</Text>
+                                ) : clinicas.map((item, index) => (
                                     <TouchableOpacity key={index} style={styles.modalItem} onPress={() => selecionarClinica(item)}>
                                         <Text style={styles.modalItemTexto}>{item.nome}</Text>
                                         <Text style={styles.modalItemSubtexto}>{item.cnpj}</Text>

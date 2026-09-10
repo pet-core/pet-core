@@ -30,5 +30,6 @@ export const API_ROUTES = {
     catalogos: {
         especializacoes: "/catalogos/especializacoes",
         clinicas: "/catalogos/clinicas",
+        exames: "/catalogos/exames",
     },
 } as const;

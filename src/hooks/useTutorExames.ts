@@ -1,37 +1,17 @@
-import { useState, useEffect } from "react";
-import type { RegistroClinico } from "../types/models";
-import { getUsuarioLogado } from "../services/authStorage";
-import { getClinicalRecords } from "../services/clinicalRecordService";
-import { KEYS } from "../services/storage";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useClinicalRecords } from "./api/useClinicalRecords";
 
 export function useTutorExames() {
-    const [exames, setExames] = useState<RegistroClinico[]>([]);
-
+    const { usuario } = useAuth();
+    const { data: registros = [], isLoading, isError, error, refetch } = useClinicalRecords();
     const [cardAberto, setCardAberto] = useState<string | null>(null);
 
-    useEffect(() => {
-            buscarExames();
-        }, []);
-
-    async function buscarExames() {
-        const usuario = await getUsuarioLogado();
-
-        if (usuario !== null) {
-            const lista = await getClinicalRecords(KEYS.EXAMES_ENVIADOS);
-            setExames(lista.filter((item) => item.tutorId === usuario.id));
-        }
-    }
+    const exames = registros.filter((item) => item.tutorId === usuario?.id && Boolean(item.tipoExame));
 
     function abrirCard(id: string) {
-            setCardAberto(cardAberto === id ? null : id);
-        }
+        setCardAberto((atual) => atual === id ? null : id);
+    }
 
-    return {
-        exames,
-        setExames,
-        cardAberto,
-        setCardAberto,
-        buscarExames,
-        abrirCard,
-    };
+    return { exames, cardAberto, setCardAberto, buscarExames: refetch, abrirCard, isLoading, isError, error };
 }

@@ -3,7 +3,7 @@ import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useTutorExames } from "../../hooks/useTutorExames";
 import { useAppNavigation } from "../../types";
 export default function Exames() {
-    const { exames, setExames, cardAberto, setCardAberto, buscarExames, abrirCard } = useTutorExames();
+    const { exames, cardAberto, buscarExames, abrirCard, isLoading, isError, error } = useTutorExames();
 
     const navigation = useAppNavigation();
 
@@ -11,8 +11,11 @@ export default function Exames() {
             <View style={styles.container}>
                 <MaterialCommunityIcons name="test-tube" size={50} color="#7167F6" alignSelf= "center"/>
                 <Text style={styles.titulo}>Exames</Text>
+                {isLoading && <Text style={styles.vazio}>Carregando exames...</Text>}
+                {isError && <Text style={styles.vazio}>{error instanceof Error ? error.message : "Não foi possível carregar os exames."}</Text>}
+                {!isLoading && !isError && exames.length === 0 && <Text style={styles.vazio}>Nenhum exame recebido.</Text>}
     
-                <FlatList data={exames} keyExtractor={(item) => item.id} ListEmptyComponent={<Text style={styles.vazio}>Nenhum exame recebido.</Text>} renderItem={({ item }) => (
+                <FlatList data={exames} keyExtractor={(item) => item.id} renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} onPress={() => abrirCard(item.id)}>
                         <Text style={styles.cardTitulo}>{item.tipoExame}</Text>
                         <Text style={styles.cardSubtitulo}>Solicitado por: {item.veterinarioNome}</Text>

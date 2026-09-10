@@ -1,10 +1,9 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { examesDisponiveis } from "../../data/mockData";
 import { useVetExames } from "../../hooks/useVetExames";
 import { useAppNavigation } from "../../types";
 export default function Exames() {
-    const { usuario, setUsuario, tutores, setTutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, setPetsDoTutor, petSelecionado, setPetSelecionado, exameSelecionado, setExameSelecionado, arquivoSolicitacao, setArquivoSolicitacao, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, modalExame, setModalExame, buscarDados, buscarPetsDoTutor, selecionarTutor, selecionarPet, selecionarExame, selecionarArquivo, enviarExame } = useVetExames();
+    const { tutores, tutorSelecionado, petSelecionado, exameSelecionado, arquivoSolicitacao, mensagem, modalTutor, modalPet, modalExame, examesDisponiveis, setModalTutor, setModalPet, setModalExame, selecionarTutor, selecionarPet, selecionarExame, selecionarArquivo, enviarExame, isLoading, isSaving, isError, error } = useVetExames();
 
     const navigation = useAppNavigation();
 
@@ -12,7 +11,9 @@ export default function Exames() {
             <ScrollView contentContainerStyle={styles.container}>
                 <MaterialCommunityIcons name="test-tube" size={50} color="#7167F6" alignSelf= "center"/>
                 <Text style={styles.titulo}>Solicitar Exame</Text>
+                {isError && <Text style={styles.mensagem}>{error instanceof Error ? error.message : "Não foi possível carregar os dados."}</Text>}
                 {mensagem !== "" && <Text style={styles.mensagem}>{mensagem}</Text>}
+                {isLoading && <Text style={styles.carregando}>Carregando dados...</Text>}
                 <TouchableOpacity style={styles.select} onPress={() => setModalTutor(true)}>
                     <Text style={tutorSelecionado ? styles.selectTexto : styles.selectPlaceholder}>
                     {tutorSelecionado ? tutorSelecionado.nome : "Selecionar tutor"}
@@ -49,7 +50,7 @@ export default function Exames() {
     
                 <TouchableOpacity style={styles.btn} onPress={enviarExame}>
                     <Ionicons name="send" size={18} color="#fff"/>
-                    <Text style={styles.textoBtn}>Enviar</Text>
+                    <Text style={styles.textoBtn}>{isSaving ? "Enviando..." : "Enviar"}</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.goBack()}>
@@ -125,6 +126,12 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 20,
         textAlign: "center",
+    },
+
+    carregando: {
+        color: "#666",
+        textAlign: "center",
+        marginBottom: 12,
     },
 
     mensagem: {

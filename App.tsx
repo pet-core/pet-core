@@ -16,7 +16,8 @@ export default function App() {
                         <NavigationContainer>
                         <StatusBar style="auto" />
                         <AppNavigator />
-                    </NavigationContainer>
+                        </NavigationContainer>
+                    </AuthProvider>
                 </QueryProvider>
             </SafeAreaProvider>
         </GestureHandlerRootView>

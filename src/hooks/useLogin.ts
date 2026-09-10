@@ -1,9 +1,10 @@
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useAppNavigation } from "../types";
+import type { Usuario } from "../types/models";
 
 export function useLogin() {
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     const [email, setEmail] = useState("");
 
@@ -13,7 +14,7 @@ export function useLogin() {
 
     const [tipoMensagem, setTipoMensagem] = useState("");
 
-    function mostrarMensagem(tipo, texto) {
+    function mostrarMensagem(tipo: string, texto: string) {
             setTipoMensagem(tipo);
             setMensagem(texto);
         }
@@ -29,7 +30,7 @@ export function useLogin() {
             }
     
             const dados = await AsyncStorage.getItem("USUARIOS");
-            const usuarios = dados ? JSON.parse(dados) : [];
+            const usuarios: Usuario[] = dados ? JSON.parse(dados) : [];
             const usuarioEncontrado = usuarios.find((item) => {
                 return item.email === email && item.senha === senha;
             });

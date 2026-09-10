@@ -1,10 +1,8 @@
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import type { Usuario, Clinica } from "../types/models";
 
 export function useCadastro() {
-    const navigation = useNavigation();
-
     const [nome, setNome] = useState("");
 
     const [nascimento, setNascimento] = useState("");
@@ -39,12 +37,12 @@ export function useCadastro() {
 
     const [modalClinica, setModalClinica] = useState(false);
 
-    function mostrarMensagem(tipo, texto) {
+    function mostrarMensagem(tipo: string, texto: string) {
             setTipoMensagem(tipo);
             setMensagem(texto);
         }
 
-    function selecionarClinica(item) {
+    function selecionarClinica(item: Clinica) {
             setClinica(item.nome);
             setNomeClinica(item.nome);
             setCnpj(item.cnpj);
@@ -57,7 +55,7 @@ export function useCadastro() {
             setClinica("");
         }
 
-    function formatarData(texto) {
+    function formatarData(texto: string) {
             let numeros = texto.replace(/\D/g, "");
             if (numeros.length > 8) {
                 numeros = numeros.slice(0, 8);
@@ -71,7 +69,7 @@ export function useCadastro() {
             return numeros;
         }
 
-    function formatarTelefone(texto) {
+    function formatarTelefone(texto: string) {
             let numeros = texto.replace(/\D/g, "");
             if (numeros.length > 11) {
                 numeros = numeros.slice(0, 11);
@@ -104,9 +102,10 @@ export function useCadastro() {
                 return;
             }
     
-            let usuarios = [];
-            if (await AsyncStorage.getItem("USUARIOS") !== null) {
-                usuarios = JSON.parse(await AsyncStorage.getItem("USUARIOS"));
+            let usuarios: Usuario[] = [];
+            const dados = await AsyncStorage.getItem("USUARIOS");
+            if (dados !== null) {
+                usuarios = JSON.parse(dados);
             }
     
             const existeEmail = usuarios.find((item) => item.email === email);
@@ -115,7 +114,7 @@ export function useCadastro() {
                 return;
             }
     
-            const novoUsuario = {
+            const novoUsuario: Usuario = {
                 id: isVeterinario ? `VET${Date.now()}` : `${Date.now()}`,
                 nome: nome.trim(),
                 nascimento,

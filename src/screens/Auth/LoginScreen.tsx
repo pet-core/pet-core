@@ -2,12 +2,12 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from "reac
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Footer from "../../components/Footer";
-import { useNavigation } from "@react-navigation/native";
 import { useLogin } from "../../hooks/useLogin";
-export default function Login(props) {
+import { useAppNavigation } from "../../types";
+export default function Login() {
     const { email, setEmail, senha, setSenha, mensagem, setMensagem, tipoMensagem, setTipoMensagem, mostrarMensagem, entrar } = useLogin();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <SafeAreaView style={styles.container}>

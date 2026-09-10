@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { especializacoes, clinicas } from "../../data/mockData";
 import Footer from "../../components/Footer";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 import { useCadastro } from "../../hooks/useCadastro";
-export default function Cadastro(props) {
+import { useAppNavigation } from "../../types";
+export default function Cadastro() {
     const { nome, setNome, nascimento, setNascimento, telefone, setTelefone, genero, setGenero, email, setEmail, senha, setSenha, isVeterinario, setIsVeterinario, especializacao, setEspecializacao, clinica, setClinica, cnpj, setCnpj, nomeClinica, setNomeClinica, cep, setCep, complemento, setComplemento, mensagem, setMensagem, tipoMensagem, setTipoMensagem, modalEspecializacao, setModalEspecializacao, modalClinica, setModalClinica, mostrarMensagem, selecionarClinica, limparClinicaSelecionada, formatarData, formatarTelefone, cadastrar } = useCadastro();
 
-    const navigation = useNavigation();
+    const navigation = useAppNavigation();
 
     return (
             <SafeAreaView style={styles.container}>

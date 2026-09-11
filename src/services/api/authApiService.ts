@@ -35,6 +35,39 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
 
 export async function cadastrar(request: CadastroRequest): Promise<CadastroResponse> {
     const rota = request.tipoPerfil === "veterinario" ? API_ROUTES.medico.list : API_ROUTES.tutor.list;
-    const response = await apiClient.post<CadastroResponse>(rota, request);
+
+    const dataNascimento = request.nascimento?.trim();
+    if (!dataNascimento || !/^\d{2}\/\d{2}\/\d{4}$/.test(dataNascimento)) {
+        throw new Error("Data de nascimento inválida. Use DD/MM/AAAA.");
+    }
+
+    const [dia, mes, ano] = dataNascimento.split("/");
+    const dataIso = `${ano}-${mes}-${dia}`;
+    const sexo = request.genero === "Feminino" ? "F" : request.genero === "Masculino" ? "M" : null;
+
+    if (!sexo) {
+        throw new Error("Selecione o gênero.");
+    }
+
+    const payload = request.tipoPerfil === "veterinario"
+        ? {
+            nome: request.nome,
+            dataNascimento: dataIso,
+            telefone: request.telefone ?? "",
+            email: request.email,
+            sexo,
+            senha: request.senha,
+            especialidade: request.especializacao ?? "",
+        }
+        : {
+            nome: request.nome,
+            dataNascimento: dataIso,
+            telefone: request.telefone ?? "",
+            email: request.email,
+            sexo,
+            senha: request.senha,
+        };
+
+    const response = await apiClient.post<CadastroResponse>(rota, payload);
     return response.data;
 }

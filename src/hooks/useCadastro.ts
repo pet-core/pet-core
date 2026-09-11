@@ -107,6 +107,21 @@ export function useCadastro() {
             return;
         }
 
+        if (!nascimento || !/^\d{2}\/\d{2}\/\d{4}$/.test(nascimento)) {
+            mostrarMensagem("erro", "Informe a data de nascimento no formato DD/MM/AAAA.");
+            return;
+        }
+
+        if (!genero) {
+            mostrarMensagem("erro", "Selecione o gênero.");
+            return;
+        }
+
+        if (isVeterinario && !especializacao.trim()) {
+            mostrarMensagem("erro", "Informe a especialização.");
+            return;
+        }
+
         try {
             setCarregando(true);
             setMensagem("");

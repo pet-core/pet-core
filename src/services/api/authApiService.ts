@@ -43,27 +43,29 @@ export async function cadastrar(request: CadastroRequest): Promise<CadastroRespo
 
     const [dia, mes, ano] = dataNascimento.split("/");
     const dataIso = `${ano}-${mes}-${dia}`;
-    const sexo = request.genero === "Feminino" ? "F" : request.genero === "Masculino" ? "M" : null;
+    const sexo = request.genero === "Feminino" ? 0 : request.genero === "Masculino" ? 1 : null;
 
-    if (!sexo) {
+    if (sexo === null) {
         throw new Error("Selecione o gênero.");
     }
 
+    const telefoneLimpo = (request.telefone ?? "").replace(/\D/g, "");
+
     const payload = request.tipoPerfil === "veterinario"
         ? {
-            nome: request.nome,
+            nome: request.nome.trim(),
             dataNascimento: dataIso,
-            telefone: request.telefone ?? "",
-            email: request.email,
+            telefone: telefoneLimpo,
+            email: request.email.trim(),
             sexo,
             senha: request.senha,
             especialidade: request.especializacao ?? "",
         }
         : {
-            nome: request.nome,
+            nome: request.nome.trim(),
             dataNascimento: dataIso,
-            telefone: request.telefone ?? "",
-            email: request.email,
+            telefone: telefoneLimpo,
+            email: request.email.trim(),
             sexo,
             senha: request.senha,
         };

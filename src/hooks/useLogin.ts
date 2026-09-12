@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { extrairMensagemErro } from "../api";
 
 export function useLogin() {
     const { login } = useAuth();
@@ -22,8 +23,8 @@ export function useLogin() {
             setCarregando(true);
             setMensagem("");
             await login(email, senha);
-        } catch {
-            mostrarMensagem("erro", "E-mail ou senha inválidos");
+        } catch (erro) {
+            mostrarMensagem("erro", extrairMensagemErro(erro, "E-mail ou senha inválidos"));
         } finally {
             setCarregando(false);
         }

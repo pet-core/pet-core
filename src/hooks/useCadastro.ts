@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Clinica } from "../types/models";
 import { cadastrar as cadastrarApi } from "../services/api/authApiService";
 import { useClinicas, useEspecializacoes } from "./api";
+import { extrairMensagemErro } from "../api";
 
 export function useCadastro() {
     const especializacoesQuery = useEspecializacoes();
@@ -102,13 +103,34 @@ export function useCadastro() {
             return;
         }
 
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            mostrarMensagem("erro", "Informe um e-mail válido.");
+            return;
+        }
+
         if (!senha || senha.trim() === "") {
             mostrarMensagem("erro", "Informe a senha");
             return;
         }
 
+        if (senha.length < 10) {
+            mostrarMensagem("erro", "A senha deve ter no mínimo 10 caracteres.");
+            return;
+        }
+
+        if (senha.length > 30) {
+            mostrarMensagem("erro", "A senha deve ter no máximo 30 caracteres.");
+            return;
+        }
+
         if (!nascimento || !/^\d{2}\/\d{2}\/\d{4}$/.test(nascimento)) {
             mostrarMensagem("erro", "Informe a data de nascimento no formato DD/MM/AAAA.");
+            return;
+        }
+
+        const digitosTelefone = telefone.replace(/\D/g, "");
+        if (digitosTelefone.length !== 11) {
+            mostrarMensagem("erro", "Informe um telefone válido com DDD (11 dígitos).");
             return;
         }
 
@@ -132,7 +154,7 @@ export function useCadastro() {
                 senha,
                 tipoPerfil: isVeterinario ? "veterinario" as const : "tutor" as const,
                 nascimento,
-                telefone,
+                telefone: digitosTelefone,
                 genero,
                 especializacao: isVeterinario ? especializacao : undefined,
                 clinica: isVeterinario ? (clinica || nomeClinica) : undefined,
@@ -144,8 +166,8 @@ export function useCadastro() {
 
             await cadastrarApi(request);
             mostrarMensagem("sucesso", "Cadastro realizado com sucesso!");
-        } catch {
-            mostrarMensagem("erro", "Não foi possível realizar o cadastro. Verifique os dados e tente novamente.");
+        } catch (erro) {
+            mostrarMensagem("erro", extrairMensagemErro(erro, "Não foi possível realizar o cadastro. Verifique os dados e tente novamente."));
         } finally {
             setCarregando(false);
         }

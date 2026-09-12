@@ -52,7 +52,7 @@ export default function Cadastro() {
     
                     <TextInput placeholder="Digite seu email" style={styles.input} value={email} keyboardType="email-address" autoCapitalize="none" onChangeText={setEmail}  />
     
-                    <TextInput placeholder="Digite sua senha" style={styles.input} secureTextEntry value={senha} onChangeText={setSenha}/>
+                    <TextInput placeholder="Digite sua senha (mínimo 10 caracteres)" style={styles.input} secureTextEntry value={senha} onChangeText={setSenha}/>
     
                     <TouchableOpacity style={styles.checkboxArea} onPress={() => setIsVeterinario(!isVeterinario)}>
                         <View style={styles.checkbox}>

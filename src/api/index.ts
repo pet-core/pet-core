@@ -1,1 +1,1 @@
-export { apiClient } from "./client";
+export { apiClient, extrairMensagemErro } from "./client";

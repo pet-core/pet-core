@@ -164,7 +164,7 @@ A documentação técnica da Sprint 3 está em [`docs/`](./docs/):
 
 ## Demonstração
 
-[Assista à demonstração do aplicativo no YouTube]().
+[Assista à demonstração do aplicativo no YouTube](https://youtu.be/MBFM6O0Dzic).
 
 ## Equipe
 

@@ -6,6 +6,7 @@ interface CatalogoItem {
     id?: string;
     nome?: string;
     descricao?: string;
+    especialidade?: string;
     especializacao?: string;
     tipo?: string;
     [campo: string]: unknown;
@@ -14,7 +15,7 @@ interface CatalogoItem {
 export async function listarEspecializacoes(): Promise<string[]> {
     const response = await apiClient.get<CatalogoItem[]>(API_ROUTES.medico.list);
     const valores = response.data.flatMap((item) => {
-        const valor = item.especializacao ?? item.descricao;
+        const valor = item.especialidade ?? item.especializacao ?? item.descricao;
         return typeof valor === "string" && valor.trim() ? [valor.trim()] : [];
     });
     return [...new Set(valores)];

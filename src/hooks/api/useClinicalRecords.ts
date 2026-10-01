@@ -15,16 +15,22 @@ import {
 import type { RegistroResource } from "../../api/routes";
 import type { ClinicalRecordCreateRequest, ClinicalRecordUpdateRequest } from "../../types/api";
 import type { RegistroClinico } from "../../types/models";
+import type { OpcoesDeConsulta } from "./queryOptions";
 
 export const clinicalRecordQueryKeys = {
     all: (recurso: RegistroResource) => [recurso] as const,
     detail: (recurso: RegistroResource, id: string) => [recurso, id] as const,
 };
 
-export function useClinicalRecords(recurso: RegistroResource = "prontuario"): UseQueryResult<RegistroClinico[], Error> {
+export function useClinicalRecords(
+    recurso: RegistroResource = "prontuario",
+    opcoes: OpcoesDeConsulta = {},
+): UseQueryResult<RegistroClinico[], Error> {
     return useQuery({
         queryKey: clinicalRecordQueryKeys.all(recurso),
         queryFn: () => listarRegistrosClinicos(recurso),
+        enabled: opcoes.enabled ?? true,
+        refetchInterval: opcoes.refetchInterval ?? false,
     });
 }
 

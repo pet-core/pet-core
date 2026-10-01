@@ -10,55 +10,77 @@ export default function Home() {
     const navigation = useAppNavigation();
 
     return (
-            <View style={styles.container}>
-                <Header menuRoute="TutorMenu"/>
-                <Text style={styles.boasVindas}>Olá, {usuario?.nome}</Text>
-                <Text style={styles.subtitulo}>Meus pets</Text>
-    
-                <FlatList refreshing={isRefreshing} onRefresh={() => void refetch()} data={pets} keyExtractor={(item) => item.id} ListEmptyComponent={isLoading ? <Text style={styles.vazio}>Carregando pets...</Text> : error ? <View><Text style={styles.vazio}>Não foi possível carregar os pets.</Text><TouchableOpacity onPress={() => void refetch()}><Text style={styles.tentar}>Tentar novamente</Text></TouchableOpacity></View> : <Text style={styles.vazio}>Nenhum pet cadastrado.</Text>} renderItem={({ item }) => (
+        <View style={styles.container}>
+            <Header menuRoute="TutorMenu" />
+            <Text style={styles.boasVindas}>Olá, {usuario?.nome}</Text>
+            <Text style={styles.subtitulo}>Meus pets</Text>
+
+            <FlatList
+                refreshing={isRefreshing}
+                onRefresh={() => void refetch()}
+                data={pets}
+                keyExtractor={(item) => item.id}
+                ListEmptyComponent={
+                    isLoading ? (
+                        <Text style={styles.vazio}>Carregando pets...</Text>
+                    ) : error ? (
+                        <View>
+                            <Text style={styles.vazio}>Não foi possível carregar os pets.</Text>
+                            <TouchableOpacity onPress={() => void refetch()}>
+                                <Text style={styles.tentar}>Tentar novamente</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <Text style={styles.vazio}>Nenhum pet cadastrado.</Text>
+                    )
+                }
+                renderItem={({ item }) => (
                     <TouchableOpacity style={styles.petCard} onPress={() => abrirPet(item)}>
                         <View style={styles.petImagem}>
-                            <MaterialCommunityIcons name="paw" size={30} color="#7167F6"/>
+                            <MaterialCommunityIcons name="paw" size={30} color="#7167F6" />
                         </View>
                         <View style={styles.petInfo}>
                             <Text style={styles.petNome}>{item.nome}</Text>
-                            <Text style={styles.petTexto}>{item.especie} • {item.sexo}</Text>
+                            <Text style={styles.petTexto}>
+                                {item.especie} • {item.sexo}
+                            </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={30} color="#fff"/>
+                        <Ionicons name="chevron-forward" size={30} color="#fff" />
                     </TouchableOpacity>
-                )}/>
-    
-                <Text style={styles.subtitulo}>Serviços</Text>
-    
-                <View style={styles.cards}>
-                    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorReceitas")}>
-                        <Text style={styles.cardTexto}>Receitas</Text>
-                        <MaterialCommunityIcons name="file-document-outline" size={32} color="#fff"/>
-                    </TouchableOpacity>
-    
-                    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorExames")}>
-                        <Text style={styles.cardTexto}>Exames</Text>
-                        <MaterialCommunityIcons name="test-tube" size={32} color="#fff"/>
-                    </TouchableOpacity>
-    
-                    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorAvisos")}>
-                        <Text style={styles.cardTexto}>Avisos</Text>
-                        <Ionicons name="notifications-outline" size={32} color="#fff"/>
-                    </TouchableOpacity>
-    
-                    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorHistorico")}>
-                        <Text style={styles.cardTexto}>Histórico Pet</Text>
-                        <MaterialCommunityIcons name="file-chart-outline" size={32} color="#fff"/>
-                    </TouchableOpacity>
-    
-                    <TouchableOpacity style={styles.cardGrande} onPress={() => navigation.navigate("TutorComedouro")}>
-                        <Text style={styles.cardTexto}>Comedouro Inteligente</Text>
-                        <FontAwesome6 name="bowl-rice" size={32} color="#fff"/>
-                    </TouchableOpacity>
-                </View>
-                <Footer/>
+                )}
+            />
+
+            <Text style={styles.subtitulo}>Serviços</Text>
+
+            <View style={styles.cards}>
+                <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorReceitas")}>
+                    <Text style={styles.cardTexto}>Receitas</Text>
+                    <MaterialCommunityIcons name="file-document-outline" size={32} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorExames")}>
+                    <Text style={styles.cardTexto}>Exames</Text>
+                    <MaterialCommunityIcons name="test-tube" size={32} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorAvisos")}>
+                    <Text style={styles.cardTexto}>Avisos</Text>
+                    <Ionicons name="notifications-outline" size={32} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("TutorHistorico")}>
+                    <Text style={styles.cardTexto}>Histórico Pet</Text>
+                    <MaterialCommunityIcons name="file-chart-outline" size={32} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.cardGrande} onPress={() => navigation.navigate("TutorComedouro")}>
+                    <Text style={styles.cardTexto}>Comedouro Inteligente</Text>
+                    <FontAwesome6 name="bowl-rice" size={32} color="#fff" />
+                </TouchableOpacity>
             </View>
-        );
+            <Footer />
+        </View>
+    );
 }
 const styles = StyleSheet.create({
     container: {

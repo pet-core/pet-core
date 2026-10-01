@@ -18,6 +18,8 @@ export interface Usuario {
     fotoUrl?: string;
 }
 
+export type StatusComedouro = "cheio" | "vazio";
+
 export interface Pet {
     id: string;
     tutorId: string;
@@ -29,7 +31,7 @@ export interface Pet {
     pelagem: string;
     sexo: string;
     obitoInformado: boolean;
-    comedouroStatus: "cheio" | "vazio";
+    comedouroStatus: StatusComedouro;
 }
 
 export interface Clinica {

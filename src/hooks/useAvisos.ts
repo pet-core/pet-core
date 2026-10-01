@@ -1,24 +1,22 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useRoute, type RouteProp } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
-import { useClinicalRecords } from "./api/useClinicalRecords";
+import { selecionarProtocolosDoTutor } from "../domain/tutorRecords";
+import type { RootStackParamList } from "../types/navigation";
 import type { RegistroClinico } from "../types/models";
+import { useClinicalRecords } from "./api/useClinicalRecords";
+import { useCardAberto } from "./useCardAberto";
 
 export function useAvisos() {
     const { usuario } = useAuth();
+    const { params } = useRoute<RouteProp<RootStackParamList, "TutorAvisos">>();
     const registrosQuery = useClinicalRecords("protocolo");
-    const [cardAberto, setCardAberto] = useState<string | null>(null);
+    const { cardAberto, setCardAberto, abrirCard } = useCardAberto(params?.registroId);
 
-    const avisos = useMemo<RegistroClinico[]>(() => {
-        if (!usuario) return [];
-
-        return (registrosQuery.data ?? []).filter(
-            (item) => item.tipoRegistro === "protocolo" && item.tutorId === usuario.id,
-        );
-    }, [registrosQuery.data, usuario]);
-
-    function abrirCard(id: string) {
-        setCardAberto((atual) => (atual === id ? null : id));
-    }
+    const avisos = useMemo<RegistroClinico[]>(
+        () => (usuario ? selecionarProtocolosDoTutor(registrosQuery.data ?? [], usuario.id) : []),
+        [registrosQuery.data, usuario],
+    );
 
     return {
         avisos,

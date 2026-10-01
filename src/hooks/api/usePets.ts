@@ -14,17 +14,23 @@ import {
 } from "../../services/api/petApiService";
 import type { PetCreateRequest, PetUpdateRequest } from "../../types/api";
 import type { Pet } from "../../types/models";
+import type { OpcoesDeConsulta } from "./queryOptions";
 
 export const petQueryKeys = {
     all: ["pets"] as const,
     detail: (id: string) => ["pets", id] as const,
 };
 
-export function usePets(tutorId?: string, enabled = true): UseQueryResult<Pet[], Error> {
+export function usePets(
+    tutorId?: string,
+    enabled = true,
+    opcoes: Pick<OpcoesDeConsulta, "refetchInterval"> = {},
+): UseQueryResult<Pet[], Error> {
     return useQuery({
         queryKey: [...petQueryKeys.all, { tutorId }],
         queryFn: () => listarPets(tutorId),
         enabled,
+        refetchInterval: opcoes.refetchInterval ?? false,
     });
 }
 

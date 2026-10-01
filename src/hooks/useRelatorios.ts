@@ -5,10 +5,12 @@ import { usePets } from "./api/usePets";
 import { useClinicalRecords, useCriarClinicalRecord } from "./api/useClinicalRecords";
 import type { Pet, RegistroClinico, Usuario } from "../types/models";
 
+type UsuarioSemSenha = Omit<Usuario, "senha">;
+
 export function useRelatorios() {
     const { usuario } = useAuth();
     const tutoresQuery = useTutores();
-    const [tutorSelecionado, setTutorSelecionado] = useState<Usuario | null>(null);
+    const [tutorSelecionado, setTutorSelecionado] = useState<UsuarioSemSenha | null>(null);
     const [petSelecionado, setPetSelecionado] = useState<Pet | null>(null);
     const [mensagem, setMensagem] = useState("");
     const [modalTutor, setModalTutor] = useState(false);
@@ -27,7 +29,7 @@ export function useRelatorios() {
         [registrosQuery.data, petSelecionado?.id],
     );
 
-    function selecionarTutor(item: Usuario) {
+    function selecionarTutor(item: UsuarioSemSenha) {
         setTutorSelecionado(item);
         setPetSelecionado(null);
         setMensagem("");

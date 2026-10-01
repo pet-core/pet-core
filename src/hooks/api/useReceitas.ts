@@ -1,15 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { criarReceita, listarReceitas } from "../../services/api/receitaApiService";
 import type { CriarReceitaRequest, Receita } from "../../types/receitas";
+import type { OpcoesDeConsulta } from "./queryOptions";
 
 export const receitaQueryKeys = {
     all: ["receitas"] as const,
 };
 
-export function useReceitas() {
+export function useReceitas(opcoes: OpcoesDeConsulta = {}) {
     return useQuery<Receita[], Error>({
         queryKey: receitaQueryKeys.all,
         queryFn: listarReceitas,
+        enabled: opcoes.enabled ?? true,
+        refetchInterval: opcoes.refetchInterval ?? false,
     });
 }
 

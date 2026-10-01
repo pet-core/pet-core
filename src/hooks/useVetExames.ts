@@ -70,18 +70,60 @@ export function useVetExames() {
         }
         try {
             await criarRegistro.mutateAsync({
-                tutorId: tutorSelecionado.id, tutorNome: tutorSelecionado.nome,
-                petId: petSelecionado.id, petNome: petSelecionado.nome,
-                veterinarioId: usuario.id, veterinarioNome: usuario.nome,
-                tipoExame: exameSelecionado, arquivoSolicitacao,
+                tutorId: tutorSelecionado.id,
+                tutorNome: tutorSelecionado.nome,
+                petId: petSelecionado.id,
+                petNome: petSelecionado.nome,
+                veterinarioId: usuario.id,
+                veterinarioNome: usuario.nome,
+                tipoExame: exameSelecionado,
+                arquivoSolicitacao,
                 dataEnvio: new Date().toISOString(),
             });
             setMensagem("Solicitação de exame enviada para o tutor.");
-            setTutorSelecionado(null); setPetSelecionado(null); setExameSelecionado(""); setArquivoSolicitacao("");
+            setTutorSelecionado(null);
+            setPetSelecionado(null);
+            setExameSelecionado("");
+            setArquivoSolicitacao("");
         } catch (error) {
             setMensagem(error instanceof Error ? error.message : "Não foi possível enviar a solicitação.");
         }
     }
 
-    return { usuario, tutores, tutorSelecionado, setTutorSelecionado, petsDoTutor, petSelecionado, setPetSelecionado, exameSelecionado, setExameSelecionado, examesDisponiveis, arquivoSolicitacao, setArquivoSolicitacao, mensagem, setMensagem, modalTutor, setModalTutor, modalPet, setModalPet, modalExame, setModalExame, selecionarTutor, selecionarPet, selecionarExame, selecionarArquivo, enviarExame, isLoading: tutoresQuery.isLoading || examesQuery.isLoading, isSaving: criarRegistro.isPending, isError: tutoresQuery.isError || examesQuery.isError, error: tutoresQuery.error ?? examesQuery.error, buscarDados: () => { void tutoresQuery.refetch(); void examesQuery.refetch(); }, buscarPetsDoTutor: () => petsQuery.refetch() };
+    return {
+        usuario,
+        tutores,
+        tutorSelecionado,
+        setTutorSelecionado,
+        petsDoTutor,
+        petSelecionado,
+        setPetSelecionado,
+        exameSelecionado,
+        setExameSelecionado,
+        examesDisponiveis,
+        arquivoSolicitacao,
+        setArquivoSolicitacao,
+        mensagem,
+        setMensagem,
+        modalTutor,
+        setModalTutor,
+        modalPet,
+        setModalPet,
+        modalExame,
+        setModalExame,
+        selecionarTutor,
+        selecionarPet,
+        selecionarExame,
+        selecionarArquivo,
+        enviarExame,
+        isLoading: tutoresQuery.isLoading || examesQuery.isLoading,
+        isSaving: criarRegistro.isPending,
+        isError: tutoresQuery.isError || examesQuery.isError,
+        error: tutoresQuery.error ?? examesQuery.error,
+        buscarDados: () => {
+            void tutoresQuery.refetch();
+            void examesQuery.refetch();
+        },
+        buscarPetsDoTutor: () => petsQuery.refetch(),
+    };
 }

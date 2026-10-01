@@ -1,15 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRoute, type RouteProp } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
+import type { RootStackParamList } from "../types/navigation";
 import { useAtualizarPet, usePets } from "./api/usePets";
 
 export function useComedouro() {
     const { usuario } = useAuth();
+    const { params } = useRoute<RouteProp<RootStackParamList, "TutorComedouro">>();
     const petsQuery = usePets(usuario?.id, Boolean(usuario?.id));
     const atualizarPet = useAtualizarPet();
-    const [petAberto, setPetAberto] = useState<string | null>(null);
+    const [petAberto, setPetAberto] = useState<string | null>(params?.petId ?? null);
     const [mensagem, setMensagem] = useState("");
 
     const pets = petsQuery.data ?? [];
+
+    // Aberto por uma notificação de comedouro vazio: já expande o pet indicado.
+    useEffect(() => {
+        if (params?.petId) setPetAberto(params.petId);
+    }, [params?.petId]);
 
     function abrirPet(id: string) {
         setPetAberto(petAberto === id ? null : id);

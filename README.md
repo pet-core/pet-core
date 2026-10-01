@@ -13,6 +13,7 @@ Aplicativo mobile para gerenciamento da saúde de pets, desenvolvido com React N
 - [Funcionalidades](#funcionalidades)
 - [Arquitetura](#arquitetura)
 - [Autenticação e API](#autenticação-e-api)
+- [Notificações](#notificações)
 - [Estrutura de pastas](#estrutura-de-pastas)
 - [Solução de problemas](#solução-de-problemas)
 - [Documentação](#documentação)
@@ -61,11 +62,35 @@ EXPO_PUBLIC_API_URL=https://petcore-net.onrender.com
 
 O Expo disponibiliza variáveis com o prefixo `EXPO_PUBLIC_` para o aplicativo. Depois de alterar o `.env`, reinicie o servidor do Expo para que a nova configuração seja carregada.
 
-´
+## Como executar
+
+```bash
+npx expo start
+```
+
+Abra o app no Expo Go (QR Code) ou em um emulador Android/iOS.
+
+## Comandos disponíveis
+
+| Comando | O que faz |
+| --- | --- |
+| `npm start` | Inicia o servidor do Expo |
+| `npm run android` / `npm run ios` | Abre no emulador |
+| `npm run typecheck` | Verifica os tipos com o TypeScript |
+
+## Funcionalidades
+
+- Login e cadastro de tutor e veterinário, com sessão persistida;
+- Tutor: pets, comedouro inteligente, avisos (protocolos), receitas, exames e histórico;
+- Veterinário: envio de protocolos, receitas e solicitações de exame, prontuários e relatórios;
+- **Notificações locais** para eventos clínicos e do comedouro (veja [Notificações](#notificações)).
+
+## Arquitetura
 
 - **Screens** apresentam as telas e recebem as interações do usuário.
 - **Hooks** orquestram estado, navegação e operações da tela.
 - **Services/API** encapsulam as chamadas HTTP por recurso.
+- **Domain** concentra regras de negócio puras (sem React), como as regras de notificação.
 - **Axios** é o cliente HTTP centralizado.
 - **TanStack Query** gerencia consultas, mutações, cache e invalidação.
 - **AuthContext** e `authStorage` controlam a sessão persistida.
@@ -92,6 +117,21 @@ Principais endpoints de autenticação:
 
 O fluxo de inicialização restaura a sessão salva. Sem sessão, o usuário permanece no fluxo público; com sessão, a navegação é direcionada conforme `tipoPerfil`. O logout remove a sessão local.
 
+## Notificações
+
+O PetCore usa **notificações locais** (`expo-notifications`) geradas a partir de eventos reais vindos da API.
+Para o tutor, o app dispara:
+
+| Evento no backend | Notificação | Ao tocar |
+| --- | --- | --- |
+| Veterinário envia um **protocolo** | "Novo protocolo para {pet}" | Abre **Avisos** com o card já expandido |
+| Veterinário envia uma **receita** | "Nova receita para {pet}" | Abre **Receitas** com o card expandido |
+| Veterinário solicita um **exame** | "Exame solicitado para {pet}" | Abre **Exames** com o card expandido |
+| Comedouro do pet passa de `cheio` para `vazio` | "O comedouro de {pet} está vazio" | Abre **Comedouro** com o pet expandido, pronto para **Encher** |
+
+Nenhuma notificação é manual ou fixa: cada uma só existe se o evento correspondente aparecer nos dados da API.
+Detalhes, limitações e roteiro de demonstração em [`docs/README_SPRINT4_NOTIFICACOES.md`](./docs/README_SPRINT4_NOTIFICACOES.md).
+
 ## Estrutura de pastas
 
 ```text
@@ -99,15 +139,18 @@ App.tsx                 # ponto de entrada e composição dos providers
 src/
   api/                  # cliente Axios e rotas HTTP
   components/           # componentes visuais reutilizáveis
+  config/               # constantes de configuração (ex.: intervalo de verificação)
   context/              # contexto de autenticação
-  data/                 # dados auxiliares
+  domain/               # regras de negócio puras (sem React): seletores e regras de notificação
   hooks/                # hooks de tela e orquestração
   hooks/api/            # hooks TanStack Query por recurso
+  hooks/notifications/  # hooks que geram e tratam notificações
   navigation/           # navegação e rotas protegidas
   providers/            # providers globais, incluindo QueryProvider
   screens/              # telas da aplicação
   services/             # persistência e serviços de domínio
   services/api/         # acesso HTTP por recurso
+  services/notifications/ # expo-notifications e persistência do estado de notificações
   types/                # modelos, contratos de API e navegação
 
 scripts/                # scripts auxiliares de migração e organização
@@ -160,7 +203,8 @@ A documentação técnica da Sprint 3 está em [`docs/`](./docs/):
 - [`README_SPRINT3_HOOKS.md`](./docs/README_SPRINT3_HOOKS.md): hooks e TanStack Query;
 - [`README_SPRINT3_ROUTES.md`](./docs/README_SPRINT3_ROUTES.md): rotas e proteção de navegação;
 - [`README_SPRINT3_CHECKLIST_FINAL.md`](./docs/README_SPRINT3_CHECKLIST_FINAL.md): checklist final;
-- [`README_SPRINT3_AUDITORIA.md`](./docs/README_SPRINT3_AUDITORIA.md): auditoria do projeto.
+- [`README_SPRINT3_AUDITORIA.md`](./docs/README_SPRINT3_AUDITORIA.md): auditoria do projeto;
+- [`README_SPRINT4_NOTIFICACOES.md`](./docs/README_SPRINT4_NOTIFICACOES.md): notificações, fluxo e roteiro de demonstração.
 
 ## Demonstração
 

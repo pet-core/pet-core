@@ -8,13 +8,13 @@ export type RootStackParamList = {
     TutorMenu: undefined;
     TutorAdicionarPet: undefined;
     TutorAlterarDados: undefined;
-    TutorAvisos: undefined;
-    TutorComedouro: undefined;
-    TutorExames: undefined;
+    TutorAvisos: { registroId?: string } | undefined;
+    TutorComedouro: { petId?: string } | undefined;
+    TutorExames: { registroId?: string } | undefined;
     TutorHistorico: undefined;
     TutorPetDetalhe: { petId: string };
     TutorEditarPet: { petId: string };
-    TutorReceitas: undefined;
+    TutorReceitas: { registroId?: string } | undefined;
 
     VetHome: undefined;
     VetMenu: undefined;

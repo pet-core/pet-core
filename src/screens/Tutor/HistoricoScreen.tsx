@@ -3,7 +3,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useHistorico } from "../../hooks/useHistorico";
 import { useAppNavigation } from "../../types";
 export default function Historico() {
-    const { pets, petSelecionado, historicos, mensagem, cardAberto, modalPet, setModalPet, selecionarPet, solicitarHistorico, abrirCard, atualizar, carregando, atualizando, salvando, erro } = useHistorico();
+    const { pets, petSelecionado, historicos, mensagem, setMensagem, cardAberto, modalPet, setModalPet, selecionarPet, solicitarHistorico, abrirCard, atualizar, carregando, atualizando, salvando, erro } = useHistorico();
 
     const navigation = useAppNavigation();
 

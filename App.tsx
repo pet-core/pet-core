@@ -4,8 +4,13 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import AppNavigator from "./src/navigation/AppNavigator";
+import { navigationRef } from "./src/navigation/navigationRef";
 import { QueryProvider } from "./src/providers/QueryProvider";
+import { NotificationsProvider } from "./src/providers/NotificationsProvider";
 import { AuthProvider } from "./src/context/AuthContext";
+import { configurarNotificacoes } from "./src/services/notifications/notificationService";
+
+configurarNotificacoes();
 
 export default function App() {
     return (
@@ -13,9 +18,11 @@ export default function App() {
             <SafeAreaProvider>
                 <QueryProvider>
                     <AuthProvider>
-                        <NavigationContainer>
-                        <StatusBar style="auto" />
-                        <AppNavigator />
+                        <NavigationContainer ref={navigationRef}>
+                            <NotificationsProvider>
+                                <StatusBar style="auto" />
+                                <AppNavigator />
+                            </NotificationsProvider>
                         </NavigationContainer>
                     </AuthProvider>
                 </QueryProvider>

@@ -3,7 +3,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useVetExames } from "../../hooks/useVetExames";
 import { useAppNavigation } from "../../types";
 export default function Exames() {
-    const { tutores, tutorSelecionado, petSelecionado, exameSelecionado, arquivoSolicitacao, mensagem, modalTutor, modalPet, modalExame, examesDisponiveis, setModalTutor, setModalPet, setModalExame, selecionarTutor, selecionarPet, selecionarExame, selecionarArquivo, enviarExame, isLoading, isSaving, isError, error } = useVetExames();
+    const { tutores, petsDoTutor, tutorSelecionado, petSelecionado, exameSelecionado, arquivoSolicitacao, mensagem, modalTutor, modalPet, modalExame, examesDisponiveis, setModalTutor, setModalPet, setModalExame, selecionarTutor, selecionarPet, selecionarExame, selecionarArquivo, enviarExame, isLoading, isSaving, isError, error } = useVetExames();
 
     const navigation = useAppNavigation();
 

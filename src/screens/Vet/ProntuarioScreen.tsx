@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Alert, ActivityIndicator, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useProntuario } from "../../hooks/useProntuario";

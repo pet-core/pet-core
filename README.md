@@ -238,19 +238,9 @@ npm install
 npm run typecheck
 ```
 
-## Conformidade com os Critérios Avaliativos
-
-| Critério Avaliativo | Pontuação | Implementação no PetCore | Arquivos de Referência |
-| :--- | :---: | :--- | :--- |
-| **Navegação entre Telas** | **5 / 5** | • Mais de 20 telas distintas para Tutores e Veterinários<br>• React Navigation v7 (`@react-navigation/native-stack`), sem Expo Router<br>• Rotas explícitas tipadas e condicionadas ao estado de autenticação | [`src/navigation/AppNavigator.tsx`](./src/navigation/AppNavigator.tsx)<br>[`src/types/navigation.ts`](./src/types/navigation.ts) |
-| **Integração com API Backend** | **35 / 35** | • Cliente HTTP exclusivo com **Axios** (sem uso de `fetch`)<br>• TanStack Query para todas as queries e mutações com cache invalidation automático<br>• **Dois CRUDs completos via UI:**<br>&nbsp;&nbsp;1) **Pets** (Tutor): Criar, Listar, Detalhar, Editar, Excluir<br>&nbsp;&nbsp;2) **Prontuários** (Veterinário): Criar, Listar, Editar, Excluir<br>• Feedback visual com `ActivityIndicator` e tratamento de erros | [`src/api/client.ts`](./src/api/client.ts)<br>[`src/hooks/api/usePets.ts`](./src/hooks/api/usePets.ts)<br>[`src/hooks/api/useClinicalRecords.ts`](./src/hooks/api/useClinicalRecords.ts)<br>[`src/screens/Tutor/`](./src/screens/Tutor/)<br>[`src/screens/Vet/ProntuarioScreen.tsx`](./src/screens/Vet/ProntuarioScreen.tsx) |
-| **Sistema de Autenticação** | **20 / 20** | • Integração real com API .NET (`/api/Tutor/login` e `/api/Medico/login`)<br>• Fluxo completo com Login e Cadastro para tutores e veterinários<br>• Sessão persistida com `AsyncStorage` (restaura sessão ao reabrir sem expor senha)<br>• Rotas estritamente protegidas: usuário não autenticado só acessa tela pública<br>• Logout imediato limpando a sessão | [`src/context/AuthContext.tsx`](./src/context/AuthContext.tsx)<br>[`src/services/authStorage.ts`](./src/services/authStorage.ts)<br>[`src/screens/Auth/LoginScreen.tsx`](./src/screens/Auth/LoginScreen.tsx)<br>[`src/screens/Auth/CadastroScreen.tsx`](./src/screens/Auth/CadastroScreen.tsx) |
-| **Arquitetura e Código** | **20 / 20** | • Separação estrita em camadas: Telas (apenas UI), Hooks (regras de tela), Services (HTTP/API), Domain (regras puras)<br>• Nenhuma chamada HTTP ou regra direta em componentes de tela<br>• TanStack Query totalmente desacoplado da UI<br>• Nomes padronizados, TypeScript sem erros (`npm run typecheck` 100% limpo) | [`src/screens/`](./src/screens/)<br>[`src/hooks/`](./src/hooks/)<br>[`src/services/api/`](./src/services/api/)<br>[`src/domain/`](./src/domain/) |
-| **Documentação** | **20 / 20** | • README completo com problema/solução, tecnologias e instruções passo a passo<br>• Documentação técnica detalhada em [`docs/`](./docs/) para API, Auth, Hooks, Rotas e Notificações | [`README.md`](./README.md)<br>[`docs/`](./docs/) |
-
 ## Documentação
 
-A documentação técnica da Sprint 3 está em [`docs/`](./docs/):
+A documentação técnica da Sprint 3/4 está em [`docs/`](./docs/):
 
 - [`README_SPRINT3_API.md`](./docs/README_SPRINT3_API.md): contratos e endpoints;
 - [`README_SPRINT3_AUTH.md`](./docs/README_SPRINT3_AUTH.md): autenticação e sessão;

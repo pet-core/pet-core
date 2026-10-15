@@ -6,13 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "scheme": "PetCore",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
+    "scheme": "petcore",
     "ios": {
       "supportsTablet": true
     },
@@ -21,8 +15,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,7 +27,14 @@
           "color": "#7167F6",
           "defaultChannel": "avisos-clinicos"
         }
-      ]
-    ]
+      ],
+      "expo-status-bar",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "89852ab2-0e41-44a0-97fc-298e5a35af44"
+      }
+    }
   }
 }

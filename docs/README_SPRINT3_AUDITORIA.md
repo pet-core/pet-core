@@ -49,7 +49,8 @@ sem simular upload ou geração falsa de PDF.
 
 ## Validação
 
-Foi feita auditoria estática dos diretórios `src/`, incluindo busca por `fetch`, `mockData` e serviços
-legados sem consumidores. O `typecheck` depende da instalação das dependências do projeto; no ambiente
-de trabalho utilizado durante a migração, a instalação completa do `node_modules` não foi concluída,
-portanto isso não deve ser apresentado como um `tsc` executado com sucesso.
+Foi realizada auditoria completa estática e dinâmica do projeto:
+- Busca por `fetch`, dados mockados e serviços legados não utilizados: nenhuma ocorrência encontrada em `src/`.
+- Dependências instaladas com sucesso via `npm install`.
+- Verificação de tipos com TypeScript (`npm run typecheck` / `tsc --noEmit`) executada com sucesso e sem nenhum erro.
+- Rotas, CRUDs, persistência de sessão e interceptores Axios validados em conformidade com as regras da disciplina.

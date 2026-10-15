@@ -6,7 +6,7 @@ declare const process: { env: Record<string, string | undefined> };
 /** Cliente HTTP único da aplicação. */
 export const apiClient = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL || "https://petcore-net.onrender.com",
-    timeout: 15000,
+    timeout: 60000,
     headers: { "Content-Type": "application/json" },
 });
 

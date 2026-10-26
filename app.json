@@ -8,7 +8,8 @@
     "userInterfaceStyle": "light",
     "scheme": "petcore",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.company.petcore"
     },
     "android": {
       "package": "com.company.petcore",

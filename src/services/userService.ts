@@ -1,7 +1,7 @@
 import type { Usuario } from "../types/models";
-import { getUsuarios } from "./authStorage";
+import { KEYS, getData } from "./storage";
 
 export async function getTutores(): Promise<Usuario[]> {
-    const usuarios = await getUsuarios();
-    return usuarios.filter((usuario) => usuario.tipoPerfil === "tutor");
+    const usuarios = (await getData<Usuario[]>(KEYS.USUARIOS)) ?? [];
+    return usuarios.filter((usuario: Usuario) => usuario.tipoPerfil === "tutor");
 }

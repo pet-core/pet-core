@@ -82,7 +82,7 @@ npm install
 Crie um arquivo `.env` na raiz do projeto. Ele não deve ser commitado, pois pode conter configurações específicas do ambiente:
 
 ```env
-EXPO_PUBLIC_API_URL=https://petcore-net.onrender.com
+EXPO_PUBLIC_API_URL=https://petcore-net-pc2f.onrender.com
 ```
 
 O Expo disponibiliza variáveis com o prefixo `EXPO_PUBLIC_` para o aplicativo. Depois de alterar o `.env`, reinicie o servidor do Expo para que a nova configuração seja carregada.

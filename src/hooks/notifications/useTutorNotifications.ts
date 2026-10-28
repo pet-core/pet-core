@@ -20,15 +20,6 @@ import { useClinicalRecords } from "../api/useClinicalRecords";
 import { usePets } from "../api/usePets";
 import { useReceitas } from "../api/useReceitas";
 
-/**
- * Observa os dados do tutor vindos da API (mesmo cache do TanStack Query usado
- * pelas telas) e dispara notificações locais quando acontece algo novo:
- *
- * - o veterinário envia um protocolo, uma receita ou uma solicitação de exame;
- * - o comedouro de um pet passa de "cheio" para "vazio".
- *
- * Os eventos nascem no backend; as notificações só existem se o evento existir.
- */
 export function useTutorNotifications(): void {
     const { usuario } = useAuth();
     const tutorId = usuario?.tipoPerfil === "tutor" ? usuario.id : undefined;
@@ -79,7 +70,6 @@ export function useTutorNotifications(): void {
                     estadoAnterior,
                 );
 
-                // Persiste antes de disparar: se algo falhar, nunca repete em loop.
                 await salvarEstadoNotificacoes(tutorId, estado);
 
                 if (notificacoes.length > 0 && (await garantirPermissaoNotificacoes())) {

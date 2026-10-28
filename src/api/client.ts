@@ -3,7 +3,6 @@ import { obterToken } from "../services/authStorage";
 
 declare const process: { env: Record<string, string | undefined> };
 
-/** Cliente HTTP único da aplicação. */
 export const apiClient = axios.create({
     baseURL: "https://petcore-net-pc2f.onrender.com",
     timeout: 60000,
@@ -18,9 +17,6 @@ apiClient.interceptors.request.use(async (config) => {
     return config;
 });
 
-/**
- * Extrai detalhes ou mensagens de erro retornadas pelo backend ou pelo Axios.
- */
 export function extrairMensagemErro(erro: unknown, fallback: string = "Ocorreu um erro inesperado."): string {
     if (axios.isAxiosError(erro)) {
         const data = erro.response?.data;

@@ -47,10 +47,6 @@ export interface Protocolo {
     texto: string;
 }
 
-// Registros clínicos criados dinamicamente pelas telas do veterinário
-// (exames, receitas, prontuários, relatórios, solicitações de histórico).
-// Os campos em comum ficam tipados; campos específicos de cada tela usam
-// index signature, já que ainda não existe uma API real por trás deles.
 export interface RegistroClinico {
     id: string;
     tutorId: string;

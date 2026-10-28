@@ -1,12 +1,5 @@
 "use strict";
 
-/**
- * Tokenizes the body of a React component function into an ordered list of
- * top-level statements. Respects (), {}, [] nesting, strings and template
- * literals (including ${...} interpolation), so it works even though the
- * body contains JSX (JSX is just balanced {}/() from a bracket-counting
- * point of view).
- */
 function tokenizeStatements(src) {
   let i = 0;
   const n = src.length;
@@ -44,7 +37,7 @@ function tokenizeStatements(src) {
     }
   }
 
-  let mode = null; // 'block' -> ends at top-level '}'; 'semi' -> ends at top-level ';'
+  let mode = null;
 
   function detectMode(from) {
     const head = src.slice(from, from + 40);
@@ -90,10 +83,6 @@ function tokenizeStatements(src) {
   return statements.filter(Boolean);
 }
 
-/**
- * Splits a component body into { logicStatements, renderCode }.
- * "render" starts at the first top-level `if (...)` or `return` statement.
- */
 function splitComponentBody(bodySrc) {
   const statements = tokenizeStatements(bodySrc);
   const logicStatements = [];

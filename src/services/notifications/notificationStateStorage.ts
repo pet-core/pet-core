@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { EstadoNotificacoes } from "../../types/notifications";
 
-/** Persistência, por usuário, do que já foi notificado. */
 
 const chaveDoUsuario = (usuarioId: string) => `PETCORE_NOTIFICATION_STATE:${usuarioId}`;
 

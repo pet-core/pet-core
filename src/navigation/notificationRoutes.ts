@@ -7,7 +7,6 @@ export type DestinoNotificacao = {
 
 const TIPOS_VALIDOS: TipoNotificacao[] = ["protocolo", "receita", "exame", "comedouro"];
 
-/** Valida o conteúdo bruto recebido do sistema antes de confiar nele. */
 export function interpretarPayload(data: unknown): PayloadNotificacao | null {
     if (!data || typeof data !== "object") return null;
 
@@ -24,7 +23,6 @@ export function interpretarPayload(data: unknown): PayloadNotificacao | null {
     };
 }
 
-/** Decide para qual tela cada tipo de notificação leva o usuário. */
 export function resolverDestino(payload: PayloadNotificacao): DestinoNotificacao {
     switch (payload.tipo) {
         case "protocolo":

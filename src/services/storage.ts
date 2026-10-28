@@ -1,8 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { mockUsers, mockPets } from "../data/mockData";
 
-// Chaves centralizadas do AsyncStorage. Mantidas iguais às usadas hoje pelos
-// hooks para não perder dados já gravados durante o desenvolvimento.
 export const KEYS = {
     USUARIOS: "USUARIOS",
     PETS: "PETS",

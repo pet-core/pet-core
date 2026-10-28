@@ -13,8 +13,6 @@ import { apiClient } from "./src/api";
 
 configurarNotificacoes();
 
-// Acorda o servidor no Render (free tier hiberna após inatividade).
-// A requisição é descartada silenciosamente — serve só para iniciar o cold start.
 apiClient.get("/api/Tutor/login").catch(() => {});
 
 export default function App() {

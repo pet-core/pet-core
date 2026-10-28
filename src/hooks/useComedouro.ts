@@ -14,7 +14,6 @@ export function useComedouro() {
 
     const pets = petsQuery.data ?? [];
 
-    // Aberto por uma notificação de comedouro vazio: já expande o pet indicado.
     useEffect(() => {
         if (params?.petId) setPetAberto(params.petId);
     }, [params?.petId]);

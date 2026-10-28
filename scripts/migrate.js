@@ -1,17 +1,6 @@
 #!/usr/bin/env node
 "use strict";
 
-/**
- * SPRINT 3 - PARTE 1
- * Codemod: Expo Router -> React Navigation (Native Stack)
- *          + extração da lógica das Views para Custom Hooks (camada de Control)
- *
- * Uso:
- *   node scripts/migrate.js <pasta-do-projeto-original> <pasta-de-saida>
- *
- * O script é IDEMPOTENTE: pode ser rodado de novo, ele sempre regenera a
- * pasta de saída do zero a partir do projeto original.
- */
 
 const fs = require("fs");
 const path = require("path");
@@ -26,9 +15,6 @@ if (!SRC_ROOT || !OUT_ROOT) {
   process.exit(1);
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function read(p) {
   return fs.readFileSync(p, "utf8");
@@ -54,8 +40,6 @@ function extractImportLines(src) {
   return { importLines, rest: lines.slice(i).join("\n") };
 }
 
-// Parses `import Default, { a, b as c } from "source";` style lines into a
-// list of { local, source, isDefault }.
 function parseImportLine(line) {
   const m = line.match(/^\s*import\s+(.+?)\s+from\s+["']([^"']+)["'];?\s*$/);
   if (!m) return [];
@@ -81,7 +65,6 @@ function parseImportLine(line) {
 }
 
 function resolveInternalSource(originalSource, destKind) {
-  // destKind: 'screen' (src/screens/<Group>/File.jsx) or 'hook' (src/hooks/File.js)
   const assetsIdx = originalSource.indexOf("assets/");
   if (assetsIdx !== -1) {
     const suffix = originalSource.slice(assetsIdx + "assets/".length);
@@ -97,7 +80,7 @@ function resolveInternalSource(originalSource, destKind) {
   if (/services\/storage$/.test(originalSource)) {
     return destKind === "screen" ? "../../services/storage" : "../services/storage";
   }
-  return originalSource; // node_modules package, unchanged
+  return originalSource;
 }
 
 function buildImportLine(bindings, source) {
@@ -117,8 +100,6 @@ function buildImportLine(bindings, source) {
   return `import ${parts.join(", ")} from "${source}";`;
 }
 
-// Given all parsed bindings (grouped by original source) and two code blobs
-// (logicText, renderText), returns { hookImportLines, screenImportLines }.
 function splitImportsByUsage(allBindings, logicText, renderText) {
   const bySourceHook = new Map();
   const bySourceScreen = new Map();
@@ -183,9 +164,6 @@ function extractOtherDeclaredNames(stmt) {
   return names;
 }
 
-// ---------------------------------------------------------------------------
-// Core: process one screen file
-// ---------------------------------------------------------------------------
 
 function processScreen(route) {
   const filePath = path.join(SRC_ROOT, "app", route.appFile);
@@ -205,7 +183,7 @@ function processScreen(route) {
   const hasStyles = stylesIdx !== -1;
   const bodyEnd = hasStyles ? stylesIdx : rest.lastIndexOf("}");
   let bodySrc = rest.slice(bodyStart, bodyEnd);
-  bodySrc = bodySrc.replace(/\}\s*$/, ""); // drop the function's own closing brace
+  bodySrc = bodySrc.replace(/\}\s*$/, "");
   const stylesBlock = hasStyles ? rest.slice(stylesIdx).trim() : "";
 
   const { logicStatements, renderCode } = splitComponentBody(bodySrc);
@@ -213,7 +191,6 @@ function processScreen(route) {
   const usesNavigationLib = /router\.|useLocalSearchParams/.test(bodySrc);
   const usesRoute = /useLocalSearchParams/.test(bodySrc);
 
-  // Transform router.* calls -> navigation.* and require("...assets...") paths up front.
   const transformedLogicStatements = logicStatements.map((s) => fixRequirePaths(transformNavigationCalls(s), "hook"));
   const transformedRenderCode = fixRequirePaths(transformNavigationCalls(renderCode), "screen");
 
@@ -287,8 +264,6 @@ function processScreen(route) {
           "",
         ].join("\n");
 
-  // Screen also needs its own navigation const if navigation.* appears
-  // directly inside the render JSX (inline onPress handlers, etc.).
   const renderUsesNavigation = /navigation\./.test(transformedRenderCode);
   if (renderUsesNavigation) screenImportLines.push('import { useNavigation } from "@react-navigation/native";');
 
@@ -326,9 +301,6 @@ function processScreen(route) {
   return { hookContent, screenContent, componentName };
 }
 
-// ---------------------------------------------------------------------------
-// Run
-// ---------------------------------------------------------------------------
 
 function main() {
   for (const route of ROUTES) {

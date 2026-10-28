@@ -15,8 +15,6 @@ const queryClient = new QueryClient({
 });
 
 export function QueryProvider({ children }: PropsWithChildren) {
-    // No React Native não existe "foco da janela": usamos o estado do app para
-    // pausar a verificação periódica em segundo plano e atualizar ao voltar.
     useEffect(() => {
         if (Platform.OS === "web") return;
 

@@ -1,8 +1,5 @@
 "use strict";
 
-// Maps the old expo-router path to the new React Navigation route name,
-// the screen component file (relative to app/), the group used for the
-// output folder structure, and the hook name that will hold its logic.
 const ROUTES = [
   { path: "/", routeName: "Splash", appFile: "index.jsx", group: "", screenName: "SplashScreen", hookName: null },
   { path: "/login", routeName: "Login", appFile: "login.jsx", group: "Auth", screenName: "LoginScreen", hookName: "useLogin" },

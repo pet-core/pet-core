@@ -3,10 +3,6 @@ import { Platform } from "react-native";
 import { COR_NOTIFICACAO } from "../../config/notifications";
 import type { CanalNotificacao, NotificacaoLocal } from "../../types/notifications";
 
-/**
- * Única camada que conhece o expo-notifications para disparo e permissão.
- * Hooks e regras de negócio nunca importam a biblioteca diretamente.
- */
 
 const suportado = Platform.OS !== "web";
 
@@ -21,7 +17,6 @@ const CANAIS: Record<CanalNotificacao, { nome: string; descricao: string }> = {
     },
 };
 
-/** Faz a notificação aparecer como banner também com o app em primeiro plano. */
 export function configurarNotificacoes(): void {
     if (!suportado) return;
 
@@ -50,7 +45,6 @@ async function prepararCanaisAndroid(): Promise<void> {
     );
 }
 
-/** Cria os canais (Android) e pede permissão ao usuário, se ainda necessário. */
 export async function garantirPermissaoNotificacoes(): Promise<boolean> {
     if (!suportado) return false;
 
@@ -64,7 +58,6 @@ export async function garantirPermissaoNotificacoes(): Promise<boolean> {
     return solicitada.granted;
 }
 
-/** Exibe imediatamente uma notificação local. */
 export async function dispararNotificacaoLocal(notificacao: NotificacaoLocal): Promise<void> {
     if (!suportado) return;
 
@@ -79,7 +72,6 @@ export async function dispararNotificacaoLocal(notificacao: NotificacaoLocal): P
     });
 }
 
-/** Remove da bandeja as notificações já exibidas (ex.: ao encerrar a sessão). */
 export async function limparNotificacoesExibidas(): Promise<void> {
     if (!suportado) return;
     await Notifications.dismissAllNotificationsAsync();

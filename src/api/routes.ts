@@ -1,4 +1,3 @@
-/** Rotas HTTP oficiais do backend .NET do PetCore. */
 export const API_ROUTES = {
     clinica: {
         list: "/api/Clinica",

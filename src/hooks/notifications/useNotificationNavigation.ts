@@ -4,10 +4,6 @@ import { useAuth } from "../../context/AuthContext";
 import { navigationRef } from "../../navigation/navigationRef";
 import { interpretarPayload, resolverDestino } from "../../navigation/notificationRoutes";
 
-/**
- * Leva o usuário à tela certa quando ele toca em uma notificação, seja com o
- * app em primeiro plano, em segundo plano ou fechado (abertura a frio).
- */
 export function useNotificationNavigation(): void {
     const { usuario, autenticado, carregando } = useAuth();
     const resposta = Notifications.useLastNotificationResponse();
@@ -21,14 +17,12 @@ export function useNotificationNavigation(): void {
 
         const payload = interpretarPayload(resposta.notification.request.content.data);
 
-        // Notificação de outra conta ou inválida: ignora e não tenta de novo.
         if (!payload || payload.usuarioId !== usuario.id) {
             ultimaTratada.current = idResposta;
             return;
         }
 
         const tentarNavegar = (): boolean => {
-            // O navegador do tutor só existe depois do login; espera ele montar.
             if (!navigationRef.isReady() || !navigationRef.getCurrentRoute()?.name.startsWith("Tutor")) {
                 return false;
             }

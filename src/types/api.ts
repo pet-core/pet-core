@@ -4,8 +4,6 @@ export interface LoginRequest {
     email: string;
     senha: string;
 }
-
-/** O backend oficial não documenta um token JWT; aceita-se token apenas se ele vier na resposta. */
 export interface LoginResponse {
     token?: string;
     usuario?: Usuario;

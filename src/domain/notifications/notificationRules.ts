@@ -5,7 +5,6 @@ import type {
     TipoRegistroNotificavel,
 } from "../../types/notifications";
 
-/** Fotografia dos dados do tutor em um dado momento (já filtrados por tutor). */
 export interface SnapshotTutor {
     usuarioId: string;
     protocolos: RegistroClinico[];
@@ -21,14 +20,6 @@ export interface ResultadoAvaliacao {
 
 const TIPOS_REGISTRO: TipoRegistroNotificavel[] = ["protocolo", "receita", "exame"];
 
-/**
- * Compara o snapshot atual com o que já foi visto e decide o que notificar.
- *
- * - Primeira observação do usuário (`estadoAnterior === null`): apenas registra
- *   a linha de base, sem notificar, para não disparar o histórico inteiro.
- * - Depois disso, notifica cada registro clínico inédito enviado pelo
- *   veterinário e cada comedouro que passou de "cheio" para "vazio".
- */
 export function avaliarNotificacoes(
     snapshot: SnapshotTutor,
     estadoAnterior: EstadoNotificacoes | null,
@@ -54,8 +45,6 @@ export function avaliarNotificacoes(
             }
         }
 
-        // União (e não substituição): uma resposta vazia/parcial da API não
-        // pode "esquecer" registros e causar notificações repetidas depois.
         idsVistos[tipo] = Array.from(new Set([...anteriores, ...atuais.map((registro) => registro.id)]));
     }
 

@@ -4,12 +4,20 @@ A autenticação é feita contra o backend real.
 
 ## Login
 
-O app usa:
+O app usa o endpoint unificado com especificação de role:
 
-- `GET /api/Tutor/login?email={email}&senha={senha}`
-- `GET /api/Medico/login?email={email}&senha={senha}`
+- `POST /api/auth/login`
 
-O fluxo tenta Tutor primeiro e Médico veterinário em seguida. Não existe endpoint de login único na documentação recebida.
+Payload:
+```json
+{
+  "email": "usuario@exemplo.com",
+  "password": "senha",
+  "role": "tutor"
+}
+```
+
+O fluxo tenta Tutor (`role: "tutor"`) primeiro e Médico (`role: "medico"`) em seguida quando a role não for especificada previamente.
 
 ## Cadastro
 

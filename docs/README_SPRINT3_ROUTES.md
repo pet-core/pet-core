@@ -20,10 +20,17 @@ A base configurada em `EXPO_PUBLIC_API_URL` deve apontar para o host do backend;
 
 ## Login
 
-- Tutor: `GET /api/Tutor/login?email={email}&senha={senha}`
-- Médico veterinário: `GET /api/Medico/login?email={email}&senha={senha}`
+- Tutor e Médico: `POST /api/auth/login`
 
-O aplicativo tenta primeiro o login de Tutor e, se não autenticar, tenta Médico. A resposta pode conter um token, mas a documentação das rotas não especifica JWT; por isso o aplicativo não inventa token.
+```json
+{
+  "email": "usuario@exemplo.com",
+  "password": "senha",
+  "role": "tutor"
+}
+```
+
+O aplicativo tenta primeiro o login de Tutor (`role: "tutor"`) e, se não autenticar, tenta Médico (`role: "medico"`). Quando o endpoint retorna o token JWT, ele é persistido e enviado automaticamente nas requisições seguintes.
 
 ## Observações
 

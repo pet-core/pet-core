@@ -2,15 +2,21 @@ import type { Pet, RegistroClinico, TipoPerfil, Usuario } from "./models";
 
 export interface LoginRequest {
     email: string;
-    senha: string;
+    senha?: string;
+    password?: string;
+    role?: string;
+    tole?: string;
 }
 export interface LoginResponse {
     token?: string;
+    accessToken?: string;
     usuario?: Usuario;
+    user?: Usuario;
     id?: string;
     nome?: string;
     email?: string;
     tipoPerfil?: TipoPerfil;
+    role?: string;
     [campo: string]: unknown;
 }
 

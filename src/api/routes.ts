@@ -1,4 +1,7 @@
 export const API_ROUTES = {
+    auth: {
+        login: "/api/auth/login",
+    },
     clinica: {
         list: "/api/Clinica",
         detail: (id: string) => `/api/Clinica/${id}`,
@@ -26,7 +29,7 @@ export const API_ROUTES = {
     medico: {
         list: "/api/Medico",
         detail: (id: string) => `/api/Medico/${id}`,
-        login: "/api/Medico/login",
+        login: "/api/auth/login",
         patch: (id: string) => `/api/Medico/${id}/patch`,
     },
     pet: {
@@ -52,7 +55,7 @@ export const API_ROUTES = {
     tutor: {
         list: "/api/Tutor",
         detail: (id: string) => `/api/Tutor/${id}`,
-        login: "/api/Tutor/login",
+        login: "/api/auth/login",
         patch: (id: string) => `/api/Tutor/${id}/patch`,
     },
     protocolo: {

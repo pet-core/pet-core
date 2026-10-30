@@ -8,7 +8,7 @@ interface AuthContextValue {
     token: string | null;
     carregando: boolean;
     autenticado: boolean;
-    login: (email: string, senha: string) => Promise<AuthSession>;
+    login: (email: string, senha: string, role?: string) => Promise<AuthSession>;
     logout: () => Promise<void>;
     sincronizarUsuario: (usuario: AuthSession["usuario"]) => Promise<void>;
 }
@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .finally(() => setCarregando(false));
     }, []);
 
-    const login = useCallback(async (email: string, senha: string) => {
-        const response = await loginApi({ email: email.trim(), senha });
+    const login = useCallback(async (email: string, senha: string, role?: string) => {
+        const response = await loginApi({ email: email.trim(), senha, password: senha, role });
         if (!response.usuario) {
             throw new Error("Resposta de login sem dados do usuário.");
         }

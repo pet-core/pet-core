@@ -15,14 +15,15 @@ export function useLogin() {
         setMensagem(texto);
     }
 
-    async function entrar() {
+    async function entrar(roleParam?: unknown) {
         if (!email.trim()) return mostrarMensagem("erro", "Informe o e-mail");
         if (!senha.trim()) return mostrarMensagem("erro", "Informe a senha");
 
         try {
             setCarregando(true);
             setMensagem("");
-            await login(email, senha);
+            const role = typeof roleParam === "string" ? roleParam : undefined;
+            await login(email, senha, role);
         } catch (erro) {
             mostrarMensagem("erro", extrairMensagemErro(erro, "E-mail ou senha inválidos"));
         } finally {

@@ -3,12 +3,20 @@ import { API_ROUTES } from "../../api/routes";
 import type { CadastroRequest, CadastroResponse, LoginRequest, LoginResponse } from "../../types/api";
 import type { Usuario } from "../../types/models";
 
-function normalizarUsuario(data: LoginResponse | CadastroResponse, tipoPerfil: "tutor" | "veterinario"): Usuario {
-    const origem = (data.usuario ?? data) as Record<string, unknown>;
+function normalizarUsuario(data: LoginResponse | CadastroResponse, tipoPerfilPadrao: "tutor" | "veterinario"): Usuario {
+    const origem = ((data as LoginResponse).usuario ?? (data as LoginResponse).user ?? data) as Record<string, unknown>;
+    const roleOrigem = String(origem.role ?? origem.tipoPerfil ?? (data as LoginResponse).role ?? (data as LoginResponse).tipoPerfil ?? "").toLowerCase();
+    const tipoPerfil: "tutor" | "veterinario" =
+        roleOrigem === "medico" || roleOrigem === "veterinario"
+            ? "veterinario"
+            : roleOrigem === "tutor"
+                ? "tutor"
+                : tipoPerfilPadrao;
+
     return {
         ...(origem as unknown as Usuario),
-        id: String(origem.id ?? ""),
-        nome: String(origem.nome ?? ""),
+        id: String(origem.id ?? origem.userId ?? origem.idUsuario ?? ""),
+        nome: String(origem.nome ?? origem.name ?? ""),
         email: String(origem.email ?? ""),
         senha: "",
         tipoPerfil,
@@ -16,15 +24,40 @@ function normalizarUsuario(data: LoginResponse | CadastroResponse, tipoPerfil: "
 }
 
 export async function login(request: LoginRequest): Promise<LoginResponse> {
-    const params = { email: request.email.trim(), senha: request.senha };
+    const password = request.password ?? request.senha ?? "";
+    const email = request.email.trim();
+    const explicitRole = request.role ?? request.tole;
+
+    const tentativas: Array<{ tipoPerfil: "tutor" | "veterinario"; role: string }> = explicitRole
+        ? [
+            {
+                tipoPerfil: explicitRole.toLowerCase() === "medico" || explicitRole.toLowerCase() === "veterinario" ? "veterinario" : "tutor",
+                role: explicitRole,
+            },
+        ]
+        : [
+            { tipoPerfil: "tutor", role: "tutor" },
+            { tipoPerfil: "veterinario", role: "medico" },
+        ];
+
     let ultimoErro: unknown;
 
-    for (const [tipoPerfil, rota] of [["tutor", API_ROUTES.tutor.login], ["veterinario", API_ROUTES.medico.login]] as const) {
+    for (const { tipoPerfil, role } of tentativas) {
         try {
-            const response = await apiClient.get<LoginResponse>(rota, { params });
+            const payload = {
+                email,
+                password,
+                role,
+                tole: role,
+            };
+
+            const response = await apiClient.post<LoginResponse>(API_ROUTES.auth.login, payload);
             const data = response.data;
             const usuario = normalizarUsuario(data, tipoPerfil);
-            return { ...data, usuario, token: typeof data.token === "string" ? data.token : "" };
+            const rawToken = data.token ?? (data as Record<string, unknown>).accessToken;
+            const token = typeof rawToken === "string" ? rawToken : "";
+
+            return { ...data, usuario, token };
         } catch (error) {
             ultimoErro = error;
         }

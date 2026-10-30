@@ -6,12 +6,11 @@ A URL configurada em `EXPO_PUBLIC_API_URL` deve apontar para o host do backend. 
 
 ## Autenticação
 
-- Tutor: `GET /api/Tutor/login?email={email}&senha={senha}`
-- Médico veterinário: `GET /api/Medico/login?email={email}&senha={senha}`
+- Login unificado (Tutor e Médico): `POST /api/auth/login` (body com `email`, `password`, `role`)
 - Cadastro de tutor: `POST /api/Tutor`
 - Cadastro de médico: `POST /api/Medico`
 
-O aplicativo tenta os dois endpoints de login porque a documentação não informa um endpoint único para descobrir o perfil antes da autenticação.
+O aplicativo tenta autenticar como tutor (`role: "tutor"`) e, se necessário, como médico (`role: "medico"`).
 
 ## Recursos utilizados pelo app
 

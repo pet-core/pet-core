@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { registrarNaoAutorizadoHandler } from "../api";
 import { login as loginApi } from "../services/api/authApiService";
 import { encerrarSessao as limparSessao, obterSessao, salvarSessao, type AuthSession } from "../services/authStorage";
 
@@ -27,8 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = useCallback(async (email: string, senha: string, role?: string) => {
         const response = await loginApi({ email: email.trim(), senha, password: senha, role });
-        if (!response.usuario) {
-            throw new Error("Resposta de login sem dados do usuário.");
+        if (!response.usuario || !response.token) {
+            throw new Error("Resposta de login sem token ou dados do usuário.");
         }
         const usuario = { ...response.usuario } as Omit<typeof response.usuario, "senha">;
         delete (usuario as { senha?: string }).senha;
@@ -41,6 +42,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = useCallback(async () => {
         await limparSessao();
         setSession(null);
+    }, []);
+
+    useEffect(() => {
+        // JWT expirado/recusado em uma rota autenticada: encerra a sessão e volta ao login.
+        registrarNaoAutorizadoHandler(() => {
+            void limparSessao().finally(() => setSession(null));
+        });
+        return () => registrarNaoAutorizadoHandler(null);
     }, []);
 
     const sincronizarUsuario = useCallback(async (usuario: AuthSession["usuario"]) => {

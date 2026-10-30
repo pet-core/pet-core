@@ -1,70 +1,137 @@
+import axios from "axios";
 import { apiClient } from "../../api";
 import { API_ROUTES } from "../../api/routes";
 import type { CadastroRequest, CadastroResponse, LoginRequest, LoginResponse } from "../../types/api";
-import type { Usuario } from "../../types/models";
+import type { TipoPerfil, Usuario } from "../../types/models";
 
-function normalizarUsuario(data: LoginResponse | CadastroResponse, tipoPerfilPadrao: "tutor" | "veterinario"): Usuario {
-    const origem = ((data as LoginResponse).usuario ?? (data as LoginResponse).user ?? data) as Record<string, unknown>;
-    const roleOrigem = String(origem.role ?? origem.tipoPerfil ?? (data as LoginResponse).role ?? (data as LoginResponse).tipoPerfil ?? "").toLowerCase();
-    const tipoPerfil: "tutor" | "veterinario" =
-        roleOrigem === "medico" || roleOrigem === "veterinario"
-            ? "veterinario"
-            : roleOrigem === "tutor"
-                ? "tutor"
-                : tipoPerfilPadrao;
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+type Registro = Record<string, unknown>;
+
+function ehRegistro(valor: unknown): valor is Registro {
+    return typeof valor === "object" && valor !== null && !Array.isArray(valor);
+}
+
+/** Perfil do app -> valor de `role` aceito pelo POST /api/auth/login. */
+export function roleDaApi(tipoPerfil: TipoPerfil): "tutor" | "medico" {
+    return tipoPerfil === "veterinario" ? "medico" : "tutor";
+}
+
+function perfilDaRole(role: unknown): TipoPerfil | null {
+    const valor = String(role ?? "").toLowerCase();
+    if (valor === "medico" || valor === "veterinario") return "veterinario";
+    if (valor === "tutor") return "tutor";
+    return null;
+}
+
+function decodificarBase64Url(texto: string): string {
+    const base64 = texto.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(texto.length / 4) * 4, "=");
+    const binario = globalThis.atob(base64);
+    try {
+        return decodeURIComponent(
+            Array.from(binario, (c) => "%" + c.charCodeAt(0).toString(16).padStart(2, "0")).join(""),
+        );
+    } catch {
+        return binario;
+    }
+}
+
+/** Lê as claims do JWT (apenas para exibir dados; a validação é do backend). */
+function lerClaims(token: string): Registro {
+    try {
+        const payload = token.split(".")[1];
+        if (!payload) return {};
+        const claims = JSON.parse(decodificarBase64Url(payload)) as unknown;
+        return ehRegistro(claims) ? claims : {};
+    } catch {
+        return {};
+    }
+}
+
+const CLAIM_ID = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+const CLAIM_EMAIL = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
+const CLAIM_NOME = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
+const CLAIM_ROLE = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+
+/** O corpo pode vir cru ({ accessToken }) ou no envelope individual ({ data: { accessToken } }). */
+function desembrulharLogin(body: unknown): LoginResponse {
+    if (!ehRegistro(body)) return {};
+    if (ehRegistro(body.data) && !("accessToken" in body)) return body.data as LoginResponse;
+    return body as LoginResponse;
+}
+
+function extrairUsuario(data: LoginResponse, token: string, tipoPerfilTentado: TipoPerfil): Usuario {
+    const claims = lerClaims(token);
+    const aninhado = [data.usuario, data.user].find(ehRegistro);
+    const origem: Registro = { ...(aninhado ?? data) };
+    // Credenciais e HATEOAS nunca entram no objeto de usuário persistido.
+    for (const campo of ["accessToken", "token", "refreshToken", "links", "password", "senha"]) delete origem[campo];
+
+    const perfil =
+        perfilDaRole(origem.role ?? origem.tipoPerfil ?? data.role ?? data.tipoPerfil)
+        ?? perfilDaRole(claims.role ?? claims[CLAIM_ROLE])
+        ?? tipoPerfilTentado;
+
+    const id = origem.id ?? origem.userId ?? origem.idUsuario ?? claims.sub ?? claims[CLAIM_ID] ?? claims.nameid;
+    const nome = origem.nome ?? origem.name ?? claims.name ?? claims[CLAIM_NOME] ?? claims.unique_name;
+    const email = origem.email ?? claims.email ?? claims[CLAIM_EMAIL];
 
     return {
         ...(origem as unknown as Usuario),
-        id: String(origem.id ?? origem.userId ?? origem.idUsuario ?? ""),
-        nome: String(origem.nome ?? origem.name ?? ""),
-        email: String(origem.email ?? ""),
+        id: String(id ?? ""),
+        nome: String(nome ?? ""),
+        email: String(email ?? ""),
         senha: "",
-        tipoPerfil,
+        tipoPerfil: perfil,
     };
 }
 
+/** Status em que faz sentido tentar o outro perfil (credencial/perfil recusado). */
+const STATUS_TENTAR_OUTRO_PERFIL = new Set([400, 401, 403, 404]);
+
+// ─── login ───────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/auth/login  { email, password, role }  ->  { accessToken, ... }
+ *
+ * Com `role` explícito envia só esse perfil. Sem `role`, tenta tutor e depois
+ * médico, mas só segue para o próximo perfil quando o backend recusar as
+ * credenciais; erros de rede/5xx são propagados na hora.
+ */
 export async function login(request: LoginRequest): Promise<LoginResponse> {
-    const password = request.password ?? request.senha ?? "";
     const email = request.email.trim();
-    const explicitRole = request.role ?? request.tole;
+    const password = request.password ?? request.senha ?? "";
+    const perfilExplicito = perfilDaRole(request.role);
 
-    const tentativas: Array<{ tipoPerfil: "tutor" | "veterinario"; role: string }> = explicitRole
-        ? [
-            {
-                tipoPerfil: explicitRole.toLowerCase() === "medico" || explicitRole.toLowerCase() === "veterinario" ? "veterinario" : "tutor",
-                role: explicitRole,
-            },
-        ]
-        : [
-            { tipoPerfil: "tutor", role: "tutor" },
-            { tipoPerfil: "veterinario", role: "medico" },
-        ];
-
+    const perfis: TipoPerfil[] = perfilExplicito ? [perfilExplicito] : ["tutor", "veterinario"];
     let ultimoErro: unknown;
 
-    for (const { tipoPerfil, role } of tentativas) {
+    for (const tipoPerfil of perfis) {
         try {
-            const payload = {
+            const response = await apiClient.post<unknown>(API_ROUTES.auth.login, {
                 email,
                 password,
-                role,
-                tole: role,
-            };
+                role: roleDaApi(tipoPerfil),
+            });
+            const data = desembrulharLogin(response.data);
 
-            const response = await apiClient.post<LoginResponse>(API_ROUTES.auth.login, payload);
-            const data = response.data;
-            const usuario = normalizarUsuario(data, tipoPerfil);
-            const rawToken = data.token ?? (data as Record<string, unknown>).accessToken;
-            const token = typeof rawToken === "string" ? rawToken : "";
+            const token = typeof data.accessToken === "string" ? data.accessToken.trim() : "";
+            if (!token) {
+                throw new Error("Resposta de login sem accessToken.");
+            }
 
-            return { ...data, usuario, token };
+            return { ...data, usuario: extrairUsuario(data, token, tipoPerfil), token };
         } catch (error) {
             ultimoErro = error;
+            const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+            if (status === undefined || !STATUS_TENTAR_OUTRO_PERFIL.has(status)) throw error;
         }
     }
 
     throw ultimoErro ?? new Error("Não foi possível autenticar.");
 }
+
+// ─── cadastrar ────────────────────────────────────────────────────────────────
 
 export async function cadastrar(request: CadastroRequest): Promise<CadastroResponse> {
     const rota = request.tipoPerfil === "veterinario" ? API_ROUTES.medico.list : API_ROUTES.tutor.list;

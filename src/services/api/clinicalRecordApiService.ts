@@ -1,6 +1,10 @@
-import { apiClient } from "../../api";
+import { apiClient, extrairData, extrairDataObrigatorio, listarPaginado } from "../../api";
 import { API_ROUTES, type RegistroResource } from "../../api/routes";
-import type { ClinicalRecordCreateRequest, ClinicalRecordUpdateRequest } from "../../types/api";
+import type {
+    ClinicalRecordCreateRequest,
+    ClinicalRecordUpdateRequest,
+    SingleResponse,
+} from "../../types/api";
 import type { RegistroClinico } from "../../types/models";
 
 const routes = {
@@ -12,22 +16,23 @@ const routes = {
     protocolo: API_ROUTES.protocolo,
 } as const;
 
+// ─── serviço ─────────────────────────────────────────────────────────────────
+
 export async function listarRegistrosClinicos(recurso: RegistroResource): Promise<RegistroClinico[]> {
-    const response = await apiClient.get<RegistroClinico[]>(routes[recurso].list);
-    return response.data;
+    return listarPaginado<RegistroClinico>(routes[recurso].list);
 }
 
 export async function buscarRegistroClinico(recurso: RegistroResource, id: string): Promise<RegistroClinico> {
-    const response = await apiClient.get<RegistroClinico>(routes[recurso].detail(id));
-    return response.data;
+    const response = await apiClient.get<SingleResponse<RegistroClinico>>(routes[recurso].detail(id));
+    return extrairDataObrigatorio<RegistroClinico>(response.data);
 }
 
 export async function criarRegistroClinico(
     recurso: RegistroResource,
     request: ClinicalRecordCreateRequest,
 ): Promise<RegistroClinico> {
-    const response = await apiClient.post<RegistroClinico>(routes[recurso].list, request);
-    return response.data;
+    const response = await apiClient.post<SingleResponse<RegistroClinico>>(routes[recurso].list, request);
+    return extrairDataObrigatorio<RegistroClinico>(response.data);
 }
 
 export async function atualizarRegistroClinico(
@@ -35,8 +40,9 @@ export async function atualizarRegistroClinico(
     id: string,
     request: ClinicalRecordUpdateRequest,
 ): Promise<RegistroClinico> {
-    const response = await apiClient.put<RegistroClinico>(routes[recurso].patch(id), request);
-    return response.data;
+    const response = await apiClient.put<SingleResponse<RegistroClinico>>(routes[recurso].patch(id), request);
+    // 200 devolve { data }; 204 não tem corpo, então relê o recurso.
+    return extrairData<RegistroClinico>(response.data) ?? buscarRegistroClinico(recurso, id);
 }
 
 export async function excluirRegistroClinico(recurso: RegistroResource, id: string): Promise<void> {

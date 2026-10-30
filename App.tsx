@@ -13,7 +13,7 @@ import { apiClient } from "./src/api";
 
 configurarNotificacoes();
 
-apiClient.get("/api/Tutor/login").catch(() => {});
+apiClient.get("/").catch(() => {}); // aquece o servidor (cold start); a resposta é ignorada
 
 export default function App() {
     return (

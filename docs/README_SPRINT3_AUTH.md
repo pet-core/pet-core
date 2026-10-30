@@ -26,9 +26,7 @@ O fluxo tenta Tutor (`role: "tutor"`) primeiro e Médico (`role: "medico"`) em s
 
 ## Sessão
 
-A sessão persistida contém somente os dados do usuário e, quando o backend fornecer um token, o token. A senha nunca é armazenada localmente.
-
-Como a documentação recebida não especifica JWT nem outro mecanismo de token, o aplicativo não inventa um token.
+O backend devolve `accessToken` (JWT). O app o guarda em `expo-secure-store` e o envia em `Authorization: Bearer`. Os dados do usuário (sem senha e sem token) ficam no AsyncStorage. Um `401` em rota autenticada encerra a sessão. Detalhes e pontos a confirmar: `API_CONTRACT.md`.
 
 ## Proteção de rotas
 
